@@ -30,7 +30,7 @@ How codesift relates to existing tools. codesift is **complementary**, not a dro
 | Hot path | In-memory indexes; snapshots for restart | Disk-backed fjall + usearch + tantivy (`.codesift/`) |
 | Semantic search | Not a focus in public material | Planned (embeddings + BM25 hybrid) |
 | Analysis depth | Structural indexes | Path to inspections, complexity, architectural views |
-| Remote repos | `codedb_remote` via cloud | Local-first; PURL/library docs (integrate-first, planned) |
+| Remote repos | `codedb_remote` via cloud | Local-first; [PURL library docs](../future/purl-library-docs.md) (integrate-first) |
 | Ecosystem | Pairs with [muonry](https://codegraff.com) for edits + instant index sync | Index/analyze; refactor **preview** — apply via LSP / ast-grep |
 
 **Relationship:** Direct competitor on **Phase 1–3 structural MCP** (symbols, deps, fast agent queries). codesift differentiates on **semantic retrieval**, **deeper IntelliJ-style analysis**, and **local dependency intelligence**. Benchmarks and token efficiency in codedb’s blog are a useful bar for codesift MCP design.

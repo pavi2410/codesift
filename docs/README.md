@@ -11,6 +11,7 @@ Documentation index and reading paths.
 | Implement a component | [specs/README.md](specs/README.md) |
 | Understand a design decision | [adr/README.md](adr/README.md) |
 | Look up a term | [glossary.md](glossary.md) |
+| Explore future ideas | [future/README.md](future/README.md) |
 
 ## Reading paths
 
@@ -60,6 +61,7 @@ docs/
 ├── techniques/       # Algorithms and rationale
 ├── adr/              # Architecture decisions
 ├── references/       # External links and comparisons
+├── future/           # Exploring ideas (not accepted specs)
 └── milestones/       # Phase acceptance criteria
 ```
 

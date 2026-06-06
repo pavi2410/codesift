@@ -24,8 +24,8 @@ codesift exists so agents produce code that is not merely syntactically valid, b
 | **Correct** | Behavior matches intent; types and refs resolve; no broken callers | Symbol resolve; `find_references` / `get_callers`; type-aware analysis (phased); tests impact preview |
 | **Safe** | No panics, unwraps, races, or undefined behavior where avoidable | Language linters (Clippy, etc.); nil/null/optional flow; reachability |
 | **Secure** | No injection, leaks, or trust-boundary violations | Data-flow / taint analysis; security rule adapters (Semgrep); sensitive API path tracing |
-| **Performant** | Avoid obvious hot-path mistakes | Complexity heuristics; allocation/loop inspections; benchmark-adjacent patterns (phased) |
-| **Efficient** | Appropriate algorithms, data structures, and resource use | Duplicate detection; dead code removal candidates; complexity metrics |
+| **Performant** | Avoid obvious hot-path mistakes | [Cyclomatic/cognitive complexity](future/complexity-metrics.md); structural hints (nested loops); allocation inspections (phased) |
+| **Efficient** | Appropriate algorithms, data structures, and resource use | Duplicate detection; dead code removal candidates; complexity thresholds |
 | **Scalable** | Fits architecture; no accidental coupling or unbounded growth | Import/call graph; blast radius; module boundary inspections; cross-service impact |
 
 These dimensions drive **what we index, what we analyze, and what we return to agents** — not just search hits, but **actionable findings** with severity, evidence, and fix direction.
@@ -181,7 +181,7 @@ Language-agnostic or lightly language-aware:
 
 - Near-duplicate / clone clusters (semantic + fingerprint)
 - Unreferenced exports and symbols (index-backed)
-- Complexity and size heuristics
+- [Cyclomatic and cognitive complexity](future/complexity-metrics.md) per function (CFG-backed)
 - Doc vs implementation drift (semantic)
 
 **Stops:** copy-paste slop and obvious dead weight.
@@ -275,6 +275,8 @@ Modern models use MCP schemas and instructions; a **codesift exploration skill**
 | Index + call/ref graph | **Yes** (core) | — |
 | Semantic + structural search | **Yes** (core) | — |
 | Clone / similarity detection | **Yes** | — |
+| Cyclomatic / cognitive complexity | **Yes** (CFG-backed) | — |
+| PURL library doc index | **Yes** (integrate-first) | docs.rs, registries, local caches |
 | Finding schema + CI gates | **Yes** | — |
 | Rust deep semantics | Partial | rust-analyzer, Clippy |
 | Python / JS / TS rules | Adapters | Ruff, ESLint, Semgrep |
@@ -295,6 +297,9 @@ Future specs and MCP tools (not yet implemented):
 | `resolve_symbol` | Bind ref site to definition (per language) |
 | `preview_rename` | Impact before rename |
 | `dataflow_summary` | Flow in/out of a function (lite) |
+| `get_complexity` | Cyclomatic/cognitive scores for a symbol |
+| `search_library_docs` | Semantic search over PURL-indexed dependency docs |
+| `resolve_libraries` | Lockfile-resolved PURLs for workspace deps |
 | `codesift check` | CI gate on severity threshold |
 
 Finding record (conceptual):
@@ -346,4 +351,6 @@ Detailed phase breakdown: [roadmap.md](roadmap.md) (to be extended when analysis
 - [roadmap.md](roadmap.md) — phased delivery
 - [techniques/intellij-inspiration.md](techniques/intellij-inspiration.md)
 - [references/comparable-tools.md](references/comparable-tools.md)
+- [future/complexity-metrics.md](future/complexity-metrics.md) — cyclomatic/cognitive complexity
+- [future/purl-library-docs.md](future/purl-library-docs.md) — local PURL library doc index
 - [specs/mcp.md](specs/mcp.md)

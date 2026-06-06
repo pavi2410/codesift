@@ -83,6 +83,24 @@ Default on-disk index directory at workspace root. See [specs/storage.md](specs/
 | ReferencesSearch | `refs:` / `callers:` queries |
 | PsiElement | PSI node / symbol extractor input |
 
+## Analysis (planned)
+
+### Cyclomatic complexity
+
+McCabe metric: number of linearly independent paths through a function's control-flow graph. Indexed per symbol for threshold inspections. See [future/complexity-metrics.md](future/complexity-metrics.md).
+
+### Cognitive complexity
+
+Sonar-style metric penalizing nested control flow — correlates with "hard to understand safely." Computed alongside cyclomatic complexity. See [future/complexity-metrics.md](future/complexity-metrics.md).
+
+### PURL (Package URL)
+
+Canonical identifier for a resolved library version (`pkg:cargo/serde@1.0.203`). Used for cross-project doc cache keys. See [future/purl-library-docs.md](future/purl-library-docs.md).
+
+### Library store
+
+Global on-disk cache (`~/.codesift/global/`) of chunked, embedded dependency documentation shared across workspace indexes.
+
 ## Interfaces
 
 ### MCP (Model Context Protocol)
