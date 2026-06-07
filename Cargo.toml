@@ -19,6 +19,11 @@ codesift-index = { path = "crates/codesift-index" }
 codesift-parse = { path = "crates/codesift-parse" }
 codesift-query = { path = "crates/codesift-query" }
 codesift-store = { path = "crates/codesift-store" }
+codesift-mcp = { path = "crates/codesift-mcp" }
+rmcp = { version = "1.7", features = ["transport-io"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+schemars = "0.8"
+anyhow = "1"
 fjall = "3.1"
 globset = "0.4"
 ignore = "0.4"

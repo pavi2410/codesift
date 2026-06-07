@@ -1,6 +1,6 @@
 [package]
-name = "codesift-query"
-description = "Query parsing and execution for codesift"
+name = "codesift-mcp"
+description = "MCP server for codesift code intelligence"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -8,15 +8,17 @@ authors.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-camino.workspace = true
+anyhow.workspace = true
 codesift-core.workspace = true
-codesift-store.workspace = true
-globset.workspace = true
+codesift-query.workspace = true
+rmcp.workspace = true
+schemars.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-thiserror.workspace = true
+tokio.workspace = true
 
 [dev-dependencies]
 camino.workspace = true
+codesift-index.workspace = true
 codesift-store.workspace = true
 tempfile.workspace = true

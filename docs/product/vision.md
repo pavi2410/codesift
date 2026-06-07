@@ -25,8 +25,18 @@ Agents working at scale also need **deep static intelligence** — inspections, 
 2. **Indexes** symbols, references, call edges, and semantic chunks
 3. **Persists** everything to a local `.codesift/` store with stable symbol IDs
 4. **Updates incrementally** on file changes (target: sub-second per save)
-5. **Queries** via a structural DSL, semantic search, and hybrid retrieval
-6. **Exposes** results through CLI and MCP for humans and agents
+5. **Queries** via a structural DSL (CLI debug), semantic search, and hybrid retrieval
+6. **Exposes** intelligence primarily through **MCP tools for agents**; CLI for index ops, CI, and engineer debug
+
+### Interfaces
+
+| Consumer | Primary surface | Role |
+|----------|-----------------|------|
+| AI agents | **MCP** (`find_references`, `get_callers`, …) | IDE-like typed tools; schema discovery |
+| Humans / CI | **CLI** (`index`, `status`, `export`) | Index lifecycle, health, export |
+| Engineers | CLI debug (`symbol`, `refs --name`, `query`) | Troubleshooting; not the agent path |
+
+See [ADR 0010](../adr/0010-mcp-agent-frontend-cli-ops.md).
 
 ## Inspiration: IntelliJ for agents
 
@@ -39,7 +49,7 @@ IntelliJ's power comes from separating parsing (PSI), persistent indexes (stubs)
 | PSI (Program Structure Interface) | Unified AST + symbol layer per language |
 | Stub indexes | Persistent symbol/ref/call indexes in fjall |
 | FileBasedIndex | Per-file metadata keyed by path + content hash |
-| Find Usages / ReferencesSearch | `refs:` and `callers:` queries |
+| Find Usages / ReferencesSearch | MCP `find_references`; CLI `refs --name` (debug) |
 | Inspections / Qodana | Pluggable analysis + CI gates (phased) |
 | Refactorings | Preview and impact (phased); apply elsewhere |
 | Type inference / resolve | Per language, phased |

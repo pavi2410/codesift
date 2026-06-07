@@ -5,7 +5,7 @@
 [![Status](https://img.shields.io/badge/status-structural%20MVP-green)](docs/capabilities.md)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
-Rust-based indexing engine for AI agents and CI. Structural index + CLI MVP implemented; semantic search and MCP next.
+Rust-based indexing engine for AI agents and CI. Structural index, MCP agent frontend, and CLI ops/debug implemented; semantic search next.
 
 ## Development
 
@@ -16,8 +16,10 @@ mise trust
 mise run fix    # cargo fmt + clippy --fix
 mise run check  # CI-equivalent
 mise run cli index .
-mise run cli --format json query "symbol:name=main kind=function"
+mise run cli mcp --workspace .
 ```
+
+**Agents → MCP** (`find_references`, `get_callers`, …). **Humans/CI → CLI** (`index`, `status`, `export`, debug `refs --name`).
 
 ## Dogfooding
 
@@ -31,16 +33,17 @@ Agent exercises with ground truth and baselines: [docs/dogfooding/](docs/dogfood
 - [Specs](docs/specs/README.md) — implementation contracts
 - [Contributing](CONTRIBUTING.md)
 
-## Interfaces (planned)
+## Interfaces
 
 ```bash
-# CLI
-codesift index .
-codesift query "callers:of=sym://..."
-codesift search "retry with exponential backoff" --lang rust
-
-# MCP (stdio transport)
+# Agents — MCP (primary)
 codesift mcp --workspace .
+
+# Humans / CI — CLI ops and debug
+codesift index .
+codesift status
+codesift refs --name parse_query --format ascii
+codesift export --type ref
 ```
 
 ## License

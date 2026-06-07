@@ -55,9 +55,9 @@ lockfile-resolution ───► purl-library-docs
 |----|------------|------------|--------------|--------|
 | `cli-structural` | `index`, `query`, `symbol`, `refs`, `status`, `export` | [cli](specs/cli.md) | `structural-index-rust` | verified |
 | `cli-search` | `search` hybrid command | [cli](specs/cli.md) | `semantic-search` | spec-draft |
-| `mcp-core-tools` | `index_status`, `query_structural`, `get_symbol`, `find_references`, `get_callers` | [mcp](specs/mcp.md) | `structural-index-rust` | spec-draft |
+| `mcp-core-tools` | `index_status`, `get_symbol`, `find_references`, `get_callers` | [mcp](specs/mcp.md) | `structural-index-rust` | verified |
 | `mcp-semantic-tools` | `search_semantic`, `read_chunk` | [mcp](specs/mcp.md) | `semantic-search` | spec-draft |
-| `mcp-server` | `codesift mcp` stdio transport | [mcp](specs/mcp.md) | `mcp-core-tools` | spec-draft |
+| `mcp-server` | `codesift mcp` stdio transport | [mcp](specs/mcp.md) | `mcp-core-tools` | verified |
 | `lsp-adapter` | Symbol search via LSP | [use-cases](product/use-cases.md) | `structural-index-rust` | exploring |
 | `library-api` | Embeddable Rust API for IDEs | [future-crate-layout](architecture/future-crate-layout.md) | `structural-index-rust` | exploring |
 
@@ -99,7 +99,7 @@ Named bundle for “first useful for agents” — **not** a mandatory build seq
 
 ## Current focus (optional)
 
-> **Implementation focus:** `structural-index-rust` + `cli-structural` verified on the codesift workspace (2026-06-07). Dogfooding exercises [DF-001–003](dogfooding/README.md) in CI. Next: `incremental-watch`, then `mcp-core-tools`.
+> **Implementation focus:** `structural-index-rust`, `cli-structural`, `mcp-core-tools`, and `mcp-server` verified. **Next:** `incremental-watch`, then `semantic-search`. Agents use MCP — see [ADR 0010](adr/0010-mcp-agent-frontend-cli-ops.md).
 
 Update this blurb as work shifts; it does **not** block other capabilities.
 

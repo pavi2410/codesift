@@ -155,7 +155,10 @@ impl IndexStore {
                 if !seen.insert(ref_key.clone()) {
                     continue;
                 }
-                if let Some(record) = get_postcard(&self.refs, ref_key.as_bytes())? {
+                if !ref_key.starts_with("ref:") {
+                    continue;
+                }
+                if let Some(record) = get_ref_record(&self.refs, &ref_key)? {
                     out.push(record);
                 }
             }
@@ -169,7 +172,10 @@ impl IndexStore {
                 if !seen.insert(ref_key.clone()) {
                     continue;
                 }
-                if let Some(record) = get_postcard(&self.refs, ref_key.as_bytes())? {
+                if !ref_key.starts_with("ref:") {
+                    continue;
+                }
+                if let Some(record) = get_ref_record(&self.refs, &ref_key)? {
                     out.push(record);
                 }
             }
@@ -453,6 +459,13 @@ pub fn make_unresolved_id(
         "sym://{workspace_rev}/unresolved#{kind}:{name}@0:0",
         kind = kind.as_str()
     )
+}
+
+fn get_ref_record(keyspace: &Keyspace, key: &str) -> CoreResult<Option<RefRecord>> {
+    if !key.starts_with("ref:") {
+        return Ok(None);
+    }
+    get_postcard(keyspace, key.as_bytes())
 }
 
 fn kind_name_key(id: &str) -> Option<String> {

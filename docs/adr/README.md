@@ -82,3 +82,4 @@ Do **not** write ADRs for trivial choices (e.g. "use `thiserror` for errors") un
 | [0007](0007-fastembed-for-local-embeddings.md) | fastembed for local embeddings | draft |
 | [0008](0008-postcard-serialization.md) | postcard for index serialization | accepted |
 | [0009](0009-query-filter-syntax.md) | Query filter syntax (first-equals) | accepted |
+| [0010](0010-mcp-agent-frontend-cli-ops.md) | MCP as agent frontend, CLI for ops/debug | accepted |

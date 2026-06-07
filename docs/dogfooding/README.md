@@ -2,13 +2,16 @@
 
 Reproducible agent tasks on the codesift repo (or fixtures) with ground-truth answers, recorded baselines, and future automation input.
 
+**Primary agent path:** MCP (`codesift mcp`) — typed tools, no query DSL discovery. CLI-only exercises remain for debug/regression.
+
 **Not** a limitations manifest — exercises define what good looks like.
 
 ## Exercises
 
 | ID | Slug | Description |
 |----|------|-------------|
-| [DF-001](exercises/001-parse-query-usages.md) | `parse-query-usages` | Find callstack and usages of `parse_query` (codesift CLI only) |
+| [DF-001](exercises/001-parse-query-usages.md) | `parse-query-usages` | Find callstack and usages of `parse_query` (CLI debug path) |
+| [DF-001-MCP](exercises/001-parse-query-usages-mcp.md) | `parse-query-usages-mcp` | Same as DF-001 but **MCP tools only** (primary agent path) |
 | [DF-002](exercises/002-indexer-callers.md) | `indexer-callers` | Find callers of `index` function |
 | [DF-003](exercises/003-symbol-by-kind-path.md) | `symbol-by-kind-path` | Path glob + kind filter on query crate |
 
@@ -46,4 +49,4 @@ Dogfooding measures **tool + agent behavior under constraints**, not whether the
 
 ## CI encoding
 
-Integration tests in [`crates/codesift-index/tests/dogfood_exercises.rs`](../../crates/codesift-index/tests/dogfood_exercises.rs) encode DF-001–003 ground truth.
+Integration tests in [`crates/codesift-index/tests/dogfood_exercises.rs`](../../crates/codesift-index/tests/dogfood_exercises.rs) encode DF-001–003 ground truth. MCP variant: [`crates/codesift-mcp/tests/mcp_tools.rs`](../../crates/codesift-mcp/tests/mcp_tools.rs).

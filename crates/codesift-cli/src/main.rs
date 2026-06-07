@@ -3,15 +3,19 @@ use std::io::{self, IsTerminal, Write};
 use clap::{Parser, Subcommand, ValueEnum};
 use codesift_core::{Error, Result, Workspace};
 use codesift_index::{IndexOptions, Indexer};
-use codesift_query::{QueryExecutor, StatusResponse, invalid_query, parse_query};
+use codesift_query::{
+    CodeIntel, QueryExecutor, RenderOptions, invalid_query, parse_query_with_hints,
+    render_query_hits, render_refs_tree,
+};
 use codesift_store::IndexStore;
 use tracing_subscriber::EnvFilter;
 
-#[derive(Debug, Clone, Copy, ValueEnum)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
 enum OutputFormat {
     Json,
     Table,
     Plain,
+    Ascii,
 }
 
 #[derive(Parser)]
@@ -34,6 +38,9 @@ struct Cli {
 
     #[arg(long, value_enum)]
     format: Option<OutputFormat>,
+
+    #[arg(long)]
+    no_color: bool,
 
     #[command(subcommand)]
     command: Commands,
@@ -72,6 +79,7 @@ enum Commands {
         #[arg(long)]
         r#type: Option<String>,
     },
+    Mcp,
 }
 
 fn main() {
@@ -91,6 +99,9 @@ fn run() -> Result<()> {
     }
 
     let format = cli.format.unwrap_or_else(default_format);
+    let render_opts = RenderOptions {
+        color: !cli.no_color && io::stdout().is_terminal(),
+    };
 
     match cli.command {
         Commands::Index { path, force, jobs } => {
@@ -108,22 +119,20 @@ fn run() -> Result<()> {
         }
         Commands::Query { query } => {
             let store = open_store(&workspace)?;
-            let response = match parse_query(&query) {
+            let response = match parse_query_with_hints(&query) {
                 Ok(parsed) => QueryExecutor::new(&store).execute(&parsed)?,
                 Err(err) => invalid_query(&query, err.to_string()),
             };
-            print_query(&response, format)?;
+            print_query(&response, format, &render_opts)?;
         }
         Commands::Symbol { id, name, path } => {
-            let store = open_store(&workspace)?;
-            let executor = QueryExecutor::new(&store);
-            let symbols = if let Some(id) = id {
-                executor.lookup_symbol(&id)?.into_iter().collect()
-            } else if let Some(name) = name {
-                executor.lookup_by_name(&name, path.as_deref())?
-            } else {
-                return Err(Error::message("provide symbol id or --name"));
-            };
+            let intel = CodeIntel::open(&workspace)?;
+            let symbols = intel.resolve_symbol(
+                name.as_deref(),
+                id.as_deref(),
+                None,
+                path.as_deref(),
+            )?;
             print_symbols(&symbols, format)?;
         }
         Commands::Refs { id, name } => {
@@ -135,34 +144,35 @@ fn run() -> Result<()> {
                     query: format!("refs --name {name}"),
                     workspace_rev: store.meta.workspace_rev,
                     took_ms: 0,
-                    hits,
-                    total: 0,
+                    hits: hits.clone(),
+                    total: hits.len(),
                     error: None,
                 };
-                let mut response = response;
-                response.total = response.hits.len();
-                print_query(&response, format)?;
+                if format == OutputFormat::Ascii {
+                    print!(
+                        "{}",
+                        render_refs_tree(&name, &hits, &render_opts)
+                    );
+                } else {
+                    print_query(&response, format, &render_opts)?;
+                }
             } else if let Some(id) = id {
                 let query = format!("refs:to={id}");
-                let parsed = parse_query(&query)?;
+                let parsed = parse_query_with_hints(&query)?;
                 let response = executor.execute(&parsed)?;
-                print_query(&response, format)?;
+                print_query(&response, format, &render_opts)?;
             } else {
                 return Err(Error::message("provide symbol id or --name"));
             }
         }
         Commands::Status => {
-            let store = open_store(&workspace)?;
-            let status = StatusResponse {
-                workspace_rev: store.meta.workspace_rev,
-                index_format_version: store.meta.index_format_version,
-                files: store.meta.file_count,
-                symbols: store.meta.symbol_count,
-                semantic_ready: false,
-                last_indexed: store.meta.updated_at.to_rfc3339(),
-                index_path: workspace.index_dir.to_string(),
-            };
-            print_json(&status, format)?;
+            let intel = CodeIntel::open(&workspace)?;
+            let status = intel.index_status();
+            if format == OutputFormat::Ascii {
+                println!("{}", codesift_query::render_status(&status));
+            } else {
+                print_json(&status, format)?;
+            }
         }
         Commands::Export { format, output, r#type } => {
             if format != "jsonl" {
@@ -170,6 +180,13 @@ fn run() -> Result<()> {
             }
             let store = open_store(&workspace)?;
             export_jsonl(&store, output.as_deref(), r#type.as_deref())?;
+        }
+        Commands::Mcp => {
+            let intel = CodeIntel::open(&workspace)?;
+            let rt = tokio::runtime::Runtime::new()
+                .map_err(|e| Error::message(e.to_string()))?;
+            rt.block_on(codesift_mcp::run_stdio(intel))
+                .map_err(|e| Error::message(e.to_string()))?;
         }
     }
 
@@ -217,7 +234,7 @@ fn init_logging(verbose: u8, quiet: bool) {
 
 fn print_json<T: serde::Serialize + ?Sized>(value: &T, format: OutputFormat) -> Result<()> {
     match format {
-        OutputFormat::Json | OutputFormat::Plain => {
+        OutputFormat::Json | OutputFormat::Plain | OutputFormat::Ascii => {
             println!(
                 "{}",
                 serde_json::to_string_pretty(value).map_err(|e| Error::message(e.to_string()))?
@@ -233,9 +250,20 @@ fn print_json<T: serde::Serialize + ?Sized>(value: &T, format: OutputFormat) -> 
     Ok(())
 }
 
-fn print_query(response: &codesift_query::QueryResponse, format: OutputFormat) -> Result<()> {
+fn print_query(
+    response: &codesift_query::QueryResponse,
+    format: OutputFormat,
+    render_opts: &RenderOptions,
+) -> Result<()> {
     match format {
         OutputFormat::Json | OutputFormat::Plain => print_json(response, format)?,
+        OutputFormat::Ascii => {
+            if let Some(err) = &response.error {
+                println!("error {}: {}", err.code, err.message);
+            } else {
+                print!("{}", render_query_hits(response, render_opts));
+            }
+        }
         OutputFormat::Table => {
             if let Some(err) = &response.error {
                 println!("error {}: {}", err.code, err.message);
@@ -277,7 +305,7 @@ fn print_query(response: &codesift_query::QueryResponse, format: OutputFormat) -
 
 fn print_symbols(symbols: &[codesift_store::SymbolRecord], format: OutputFormat) -> Result<()> {
     match format {
-        OutputFormat::Json | OutputFormat::Plain => {
+        OutputFormat::Json | OutputFormat::Plain | OutputFormat::Ascii => {
             print_json(symbols, format)?;
         }
         OutputFormat::Table => {

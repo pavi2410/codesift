@@ -4,7 +4,9 @@
 
 Command-line interface for codesift. Implementation: `clap` (ADR-0005).
 
-**MVP scope:** `index`, `query`, `symbol`, `refs`, `status`, `export` only. `watch`, `search`, `mcp` deferred.
+**MVP scope:** `index`, `query`, `symbol`, `refs`, `status`, `export`, `mcp`. `watch`, `search` deferred.
+
+**Agent path:** use MCP (`codesift mcp`) — not CLI `query`. CLI `query` is a **debug escape hatch** for engineers and CI; agents should use typed MCP tools per [ADR 0010](../adr/0010-mcp-agent-frontend-cli-ops.md).
 
 ## Binary name
 
@@ -18,7 +20,8 @@ Command-line interface for codesift. Implementation: `clap` (ADR-0005).
 | `--index-path <path>` | Override `.codesift` location |
 | `-v, --verbose` | Increase log verbosity |
 | `-q, --quiet` | Errors only |
-| `--format <fmt>` | `json`, `table`, `plain` (default: `table` for TTY, `json` for pipe) |
+| `--format <fmt>` | `json`, `table`, `plain`, `ascii` (default: `table` for TTY, `json` for pipe) |
+| `--no-color` | Disable ANSI in `ascii` output (CI-friendly) |
 
 ## Commands
 
@@ -76,12 +79,22 @@ Runs until SIGINT. Prints incremental update events to stderr in verbose mode.
 
 ### `query`
 
-Structural query. See [query-language.md](query-language.md).
+**Debug only** — structural query DSL for engineers and CI. Agents should use MCP tools (`find_references`, `get_callers`, etc.) instead. See [query-language.md](query-language.md).
 
 ```bash
 codesift query "symbol:name=parse_query kind=function"
 codesift query 'callers:of=sym://42/...' --format json
+codesift refs --name parse_query --format ascii --no-color
 ```
+
+| `--format` | Description |
+|------------|-------------|
+| `table` | Default on TTY |
+| `json` | Default when piped |
+| `ascii` | Tree-style human output (recommended for debug) |
+| `plain` | Pretty JSON alias |
+
+Global `--no-color` disables ANSI in `ascii` mode.
 
 ### `search`
 
