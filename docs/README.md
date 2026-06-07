@@ -56,7 +56,6 @@ Documentation index and reading paths.
 docs/
 ├── vision.md, big-picture.md, goals-and-non-goals.md, use-cases.md, glossary.md
 ├── capabilities.md   # Feature coverage (primary planning doc)
-├── roadmap.md        # Pointer to capabilities.md
 ├── architecture/     # System design
 ├── specs/            # Implementation contracts
 ├── techniques/       # Algorithms and rationale

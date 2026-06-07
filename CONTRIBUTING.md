@@ -6,7 +6,7 @@ Thank you for your interest in contributing. This project is currently in the **
 
 1. Read [docs/vision.md](docs/vision.md) and [docs/capabilities.md](docs/capabilities.md) for context.
 2. Browse [docs/README.md](docs/README.md) for curated reading paths.
-3. Check open issues and the roadmap before starting work.
+3. Check open issues and [docs/capabilities.md](docs/capabilities.md) before starting work.
 
 ## What to contribute
 
@@ -15,7 +15,7 @@ Thank you for your interest in contributing. This project is currently in the **
 | Documentation | Fix typos, clarify specs, add examples |
 | ADRs | Propose architectural decisions via new ADRs |
 | Specs | Refine schemas, query grammar, interface contracts |
-| Implementation | Available once Phase 1 begins (see roadmap) |
+| Implementation | Available once core capabilities move to `not-started` (see [capabilities](docs/capabilities.md)) |
 
 ## Documentation conventions
 

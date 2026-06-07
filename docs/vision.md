@@ -61,7 +61,7 @@ Near term: **index + query engine**. Long term: **full code intelligence engine*
 2. **Specs before code** — every crate traces to a spec or ADR
 3. **Embedded by default** — no required external services for core operation
 4. **Language depth where it matters** — Rust-first MVP, tree-sitter breadth later
-5. **Open source** — Apache-2.0, public roadmap, contributor-friendly docs
+5. **Open source** — Apache-2.0, public capability coverage, contributor-friendly docs
 
 ## See also
 

@@ -116,6 +116,5 @@ Intellectual grouping from [big-picture.md](big-picture.md) — not a schedule:
 ## See also
 
 - [milestones/](milestones/) — acceptance criteria per capability area
-- [roadmap.md](roadmap.md) — pointer to this doc (phases retired)
 - [goals-and-non-goals.md](goals-and-non-goals.md) — boundaries
 - [future/](future/) — exploring ideas before promotion here
