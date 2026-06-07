@@ -4,9 +4,16 @@ rust = "latest"
 [env]
 RUST_BACKTRACE = "1"
 
+[tasks.build-cli]
+description = "Build the codesift CLI release binary"
+run = "cargo build --release -p codesift-cli -q"
+
 [tasks.cli]
-description = "Run the codesift CLI (e.g. mise run cli -- index .)"
-run = "cargo run --release -p codesift-cli --"
+description = "Run the codesift CLI (e.g. mise run cli index .)"
+depends = ["build-cli"]
+run = "./target/release/codesift"
+run_windows = ".\\target\\release\\codesift.exe"
+raw_args = true
 
 [tasks.fmt]
 description = "Format all Rust code"

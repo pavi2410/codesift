@@ -15,8 +15,8 @@ Uses [mise](https://mise.jdx.dev/) for the Rust toolchain (see [mise.toml](mise.
 mise trust
 mise run fix    # cargo fmt + clippy --fix
 mise run check  # CI-equivalent
-mise run cli -- index .
-mise run cli -- --format json query "symbol:name=main kind=function"
+mise run cli index .
+mise run cli --format json query "symbol:name=main kind=function"
 ```
 
 ## Quick links
