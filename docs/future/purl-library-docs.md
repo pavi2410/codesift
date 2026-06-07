@@ -203,15 +203,17 @@ Combines **external doc intelligence** with **in-repo usage patterns** — highe
 | Index entire crates.io | Only **resolved** deps for indexed workspaces |
 | Real-time registry polling | Lockfile-driven versions only |
 
-## Roadmap placement
+## Coverage (integrate-first)
 
-| Milestone | Deliverable |
-|-----------|-------------|
-| Phase 2+ | `resolve_libraries` for Cargo.lock |
-| Phase 3 | Global store layout, embedding cache dedup |
-| Phase 4 | `search_library_docs` MCP + CLI; docs.rs integrate-first |
-| Phase 4+ | npm, PyPI backends |
-| Phase 5+ | Proactive `lib index` on workspace index |
+| Step | Deliverable | Prerequisite |
+|------|-------------|--------------|
+| A | `resolve_libraries` for Cargo.lock | `structural-index-rust` |
+| B | Global store layout, embedding cache dedup | `semantic-search` |
+| C | `search_library_docs` MCP + CLI; docs.rs | A + B |
+| D | npm, PyPI backends | C |
+| E | Proactive `lib index` on workspace index | C |
+
+Promote to [capabilities.md](../capabilities.md) when `spec-accepted`.
 
 ## See also
 

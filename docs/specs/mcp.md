@@ -28,6 +28,18 @@ Server loads or creates index at `{workspace}/.codesift/`. Reports readiness via
 
 ## Tools
 
+| Tool | Capability | Prerequisite |
+|------|------------|--------------|
+| `index_status` | `mcp-core-tools` | `structural-index-rust` |
+| `query_structural` | `mcp-core-tools` | `structural-index-rust` |
+| `get_symbol` | `mcp-core-tools` | `structural-index-rust` |
+| `find_references` | `mcp-core-tools` | `structural-index-rust` |
+| `get_callers` | `mcp-core-tools` | `structural-index-rust` |
+| `search_semantic` | `mcp-semantic-tools` | `semantic-search` |
+| `read_chunk` | `mcp-semantic-tools` | `semantic-search` |
+
+See [capabilities.md](../capabilities.md) for coverage status.
+
 ### `index_status`
 
 Returns index freshness and stats.
@@ -207,6 +219,7 @@ Truncate with `"truncated": true` field when exceeded.
 
 ## See also
 
+- [capabilities.md](../capabilities.md)
 - [cli.md](cli.md)
 - [query-language.md](query-language.md)
 - [../use-cases.md](../use-cases.md)

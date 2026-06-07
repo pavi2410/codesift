@@ -20,6 +20,20 @@ Command-line interface for codesift. Implementation: `clap` (ADR-0005).
 
 ## Commands
 
+| Command | Capability | Prerequisite |
+|---------|------------|--------------|
+| `index` | `structural-index-rust` | — |
+| `watch` | `incremental-watch` | `structural-index-rust` |
+| `query` | `cli-structural` | `structural-index-rust` |
+| `search` | `cli-search` | `semantic-search` |
+| `symbol` | `cli-structural` | `structural-index-rust` |
+| `refs` | `cli-structural` | `structural-index-rust` |
+| `export` | `cli-structural` | `structural-index-rust` |
+| `status` | `cli-structural` | `structural-index-rust` |
+| `mcp` | `mcp-server` | `mcp-core-tools` |
+
+See [capabilities.md](../capabilities.md) for coverage status.
+
 ### `index`
 
 Build or update the index.
@@ -153,5 +167,6 @@ See [mcp.md](mcp.md).
 
 ## See also
 
+- [capabilities.md](../capabilities.md)
 - [mcp.md](mcp.md)
 - [query-language.md](query-language.md)

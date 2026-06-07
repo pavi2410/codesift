@@ -35,7 +35,7 @@ Uses `ignore` crate (ripgrep ecosystem):
 | `.rs` | rust |
 | `.md`, `.mdx` | markdown |
 
-Phase 4 adds `.ts`, `.py`, `.go`, etc.
+`multi-language` capability adds `.ts`, `.py`, `.go`, etc.
 
 ## File identity
 

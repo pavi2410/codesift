@@ -12,7 +12,7 @@ codesift serves developers (CLI, CI), AI agents (MCP), and future IDE plugins. W
 
 - **CLI:** `clap` 4.x — commands per [cli.md](../specs/cli.md)
 - **MCP:** `rmcp` 1.7.x — official SDK, stdio transport, tools per [mcp.md](../specs/mcp.md)
-- **LSP:** deferred to Phase 5
+- **LSP:** deferred to `lsp-adapter` capability
 - **HTTP REST API:** deferred; streamable HTTP on rmcp optional later
 
 ## Consequences
@@ -26,7 +26,7 @@ codesift serves developers (CLI, CI), AI agents (MCP), and future IDE plugins. W
 
 ### Negative
 
-- No LSP in MVP — IDE users use CLI or wait for Phase 5
+- No LSP until `lsp-adapter` — IDE users use CLI or MCP meanwhile
 - MCP stdio is one workspace per process
 - Two interface layers to test and maintain
 

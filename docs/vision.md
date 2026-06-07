@@ -68,5 +68,5 @@ Near term: **index + query engine**. Long term: **full code intelligence engine*
 - [Big picture](big-picture.md) — long-term intelligence vision for agents and CI
 - [Goals and non-goals](goals-and-non-goals.md)
 - [Use cases](use-cases.md)
-- [Roadmap](roadmap.md)
+- [Capabilities](capabilities.md)
 - [Architecture overview](architecture/overview.md)

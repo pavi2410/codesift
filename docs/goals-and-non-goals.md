@@ -6,7 +6,7 @@
 
 - Index definitions: modules, functions, types, fields, macros, imports
 - Index references and call sites with stable symbol IDs
-- Support queries: find symbol, find references, find callers, import graph (Phase 2+)
+- Support queries: find symbol, find references, find callers, import graph (`structural-depth`)
 - Persist indexes to disk for fast cold start
 
 ### Semantic indexing
@@ -38,7 +38,7 @@ One index serves:
 - Future IDE/LSP integrations
 - Future pluggable analyzers over PSI
 
-## Non-Goals (MVP and near-term)
+## Non-Goals
 
 | Non-goal | Rationale |
 |----------|-----------|
@@ -50,17 +50,8 @@ One index serves:
 | Building a full IDE | Inspiration source only |
 | Remote embedding APIs as default | Privacy, offline, latency; opt-in later |
 
-## Phase-specific scope
+## Capability coverage
 
-| Phase | In scope | Out of scope |
-|-------|----------|--------------|
-| 0 (now) | Docs, specs, ADRs | Rust code |
-| 1 (MVP) | Rust structural index, CLI | Semantic search, MCP |
-| 2 | Semantic + MCP + hybrid | Multi-language, LSP |
-| 3 | Incremental watch mode | Cross-crate resolve |
-| 4 | tree-sitter languages | Full type resolve |
-| 5 | LSP plugin, SAST hooks | — |
+What we build and verify is tracked in [capabilities.md](capabilities.md) — by feature, not timeline. Acceptance criteria live in [milestones/](milestones/).
 
-See [roadmap.md](roadmap.md) and [milestones/mvp.md](milestones/mvp.md) for acceptance criteria.
-
-Long-term analysis goals (inspections, duplicates, data flow, agent quality gates) are described in [big-picture.md](big-picture.md); they are intentionally out of MVP scope.
+Long-term analysis goals (inspections, duplicates, data flow, agent quality gates) are in [big-picture.md](big-picture.md); many are `exploring` until promoted to the coverage matrix.

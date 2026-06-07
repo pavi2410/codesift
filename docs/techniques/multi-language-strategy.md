@@ -10,7 +10,7 @@ Phased language support and per-language capability matrix.
 | 4 | TypeScript, Python, Go, Java | tree-sitter grammars |
 | 5+ | C/C++, Ruby, Kotlin, ... | tree-sitter as community demand |
 
-Markdown and plain docs indexed from Phase 2 (semantic).
+Markdown and plain docs indexed with `semantic-search`.
 
 ## Capability matrix (target)
 
@@ -23,7 +23,7 @@ Markdown and plain docs indexed from Phase 2 (semantic).
 | Type resolve | no | no |
 | Macro expansion | no | no |
 | Incremental reparse | yes | yes |
-| Semantic chunks | Phase 2 | Phase 4 |
+| Semantic chunks | `semantic-search` | `multi-language` |
 
 ## Per-language PSI providers
 
@@ -53,4 +53,4 @@ Each implements `PsiProvider` with language-specific query `.scm` files.
 
 - [parsing-and-psi.md](parsing-and-psi.md)
 - [../adr/0003-tree-sitter-for-parsing.md](../adr/0003-tree-sitter-for-parsing.md)
-- [../roadmap.md](../roadmap.md)
+- [../capabilities.md](../capabilities.md)

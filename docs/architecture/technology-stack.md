@@ -72,7 +72,7 @@ flowchart TB
 | Code embeddings | `nomic-embed-text-v1.5` | proposed default |
 | Lightweight fallback | `BAAI/bge-small-en-v1.5` | optional |
 | Reranking | `BAAI/bge-reranker-base` | proposed default |
-| Sparse+dense (Phase 2) | BGE-M3 via fastembed | optional |
+| Sparse+dense (`semantic-search` enhancement) | BGE-M3 via fastembed | optional |
 
 Benchmark on Rust code corpus before marking ADR-0007 as accepted.
 

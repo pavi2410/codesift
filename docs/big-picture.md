@@ -12,7 +12,7 @@ For the concise problem statement and near-term solution, see [vision.md](vision
 
 > **codesift is IntelliJ for agents** — the **brain and engine**, not the GUI. It provides the indexing, analysis, heuristics, and quality intelligence that make JetBrains IDEs indispensable, exposed as MCP tools and CLI for any agent or CI pipeline.
 
-Today codesift is scoped as an **index + query engine** (Phases 0–5 in [roadmap.md](roadmap.md)). This document defines the **analysis pillar** that grows on top of that foundation: inspections, quality signals, data-flow hints, and refactor intelligence — **exported for agents and CI**, not locked inside an editor.
+Today codesift is scoped as an **index + query engine** (see [capabilities.md](capabilities.md)). This document defines the **analysis pillar** that grows on top of that foundation: inspections, quality signals, data-flow hints, and refactor intelligence — **exported for agents and CI**, not locked inside an editor.
 
 ## What agents should write (quality dimensions)
 
@@ -88,7 +88,7 @@ A **code intelligence engine**:
 | Replacing language servers | Complementary; LSP types and diagnostics, codesift indexes and analyzes at scale |
 | Cloning Qodana / IntelliJ inspections overnight | Decades of per-language depth; integrate and grow incrementally |
 
-See [goals-and-non-goals.md](goals-and-non-goals.md) for MVP boundaries. This document describes **where we are going**, not what ships in Phase 1.
+See [goals-and-non-goals.md](goals-and-non-goals.md) for boundaries. This document describes **where we are going**; coverage status is in [capabilities.md](capabilities.md).
 
 ## Architecture: index foundation + analysis layer
 
@@ -165,9 +165,9 @@ Deep dive on index mapping: [techniques/intellij-inspiration.md](techniques/inte
 
 Intelligence deepens in layers. Each layer stops a class of agent mistakes.
 
-### Layer 1 — Discovery (Phases 1–2)
+### Layer 1 — Discovery
 
-**Ships first:** symbols, refs, callers, semantic search, MCP.
+**Capabilities:** `structural-index-rust`, `semantic-search`, `mcp-*`, `cli-*` — see [capabilities.md](capabilities.md).
 
 Agents stop wandering blind. They get stable `sym://` IDs and verified locations.
 
@@ -175,7 +175,7 @@ Agents stop wandering blind. They get stable `sym://` IDs and verified locations
 - [specs/mcp.md](specs/mcp.md)
 - [use-cases.md](use-cases.md) — agent workflows
 
-### Layer 2 — Quality signals (Phase 5+)
+### Layer 2 — Quality signals
 
 Language-agnostic or lightly language-aware:
 
@@ -186,7 +186,7 @@ Language-agnostic or lightly language-aware:
 
 **Stops:** copy-paste slop and obvious dead weight.
 
-### Layer 3 — Rule-based inspections (Phase 5+)
+### Layer 3 — Rule-based inspections
 
 Plugin model over PSI:
 
@@ -208,7 +208,7 @@ Gradual depth per language (Rust deepest first):
 
 - Correct rename impact, not just string matches
 - Typed inspections and smarter ref resolution
-- Cross-crate / import graph (Phase 2 structural depth)
+- Cross-crate / import graph (`structural-depth`)
 
 **Stops:** false-positive impact reports and wrong refactor targets.
 
@@ -221,8 +221,6 @@ Language-specific CFG and points-to (lite → deep):
 - Taint-style paths for security-sensitive APIs
 
 **Stops:** "user input reaches dangerous sink" class bugs in agent-generated code.
-
-DAST remains **runtime** and out of scope; codesift maps static findings to code locations and can **correlate** with CI DAST output via export formats.
 
 ### Layer 6 — Refactor intelligence (preview only)
 
@@ -281,7 +279,6 @@ Modern models use MCP schemas and instructions; a **codesift exploration skill**
 | Rust deep semantics | Partial | rust-analyzer, Clippy |
 | Python / JS / TS rules | Adapters | Ruff, ESLint, Semgrep |
 | Structural rewrite apply | Preview only | ast-grep, LSP |
-| Runtime DAST | No | CI DAST tools; correlate via export |
 
 JetBrains depth took years per language. codesift wins by being **open, embedded, agent-first, and composable**.
 
@@ -317,21 +314,16 @@ Finding record (conceptual):
 }
 ```
 
-## Relationship to current roadmap
+## Relationship to capability coverage
 
-| Roadmap phase | Focus | Big-picture layer |
-|---------------|-------|-------------------|
-| 0 | Documentation | This document |
-| 1 | Rust structural index, CLI | Layer 1 (partial) |
-| 2 | Semantic + MCP | Layer 1 |
-| 3 | Incremental watch | Operational scale |
-| 4 | Multi-language | Scale across ecosystems |
-| 5 | LSP + SAST hooks | Layer 3 begins |
-| 6+ (proposed) | Inspections, duplicates, dead code | Layers 2–3 |
-| 7+ (proposed) | Resolve depth, data flow | Layers 4–5 |
-| 8+ (proposed) | Refactor previews | Layer 6 |
-
-Detailed phase breakdown: [roadmap.md](roadmap.md) (to be extended when analysis phases are accepted).
+| Big-picture layer | Capability IDs (see [capabilities.md](capabilities.md)) |
+|-------------------|--------------------------------------------------------|
+| Layer 1 — Discovery | `structural-index-rust`, `semantic-search`, `mcp-*`, `cli-*`, `entry-discovery` |
+| Layer 2 — Quality signals | `quality-signals`, `complexity-metrics` |
+| Layer 3 — Inspections | `inspections-unified`, `analyzer-hooks` |
+| Layer 4 — Resolve depth | `structural-depth`, type-aware resolve (future) |
+| Layer 5 — Data flow | `dataflow-lite`, `cfg-analysis` |
+| Layer 6 — Refactor preview | `refactor-preview` |
 
 ## Principles (intelligence-specific)
 
@@ -346,9 +338,9 @@ Detailed phase breakdown: [roadmap.md](roadmap.md) (to be extended when analysis
 ## See also
 
 - [vision.md](vision.md) — concise problem and solution
-- [goals-and-non-goals.md](goals-and-non-goals.md) — MVP boundaries
+- [goals-and-non-goals.md](goals-and-non-goals.md) — boundaries
+- [capabilities.md](capabilities.md) — feature coverage matrix
 - [use-cases.md](use-cases.md) — consumers including agents
-- [roadmap.md](roadmap.md) — phased delivery
 - [techniques/intellij-inspiration.md](techniques/intellij-inspiration.md)
 - [references/comparable-tools.md](references/comparable-tools.md)
 - [future/complexity-metrics.md](future/complexity-metrics.md) — cyclomatic/cognitive complexity

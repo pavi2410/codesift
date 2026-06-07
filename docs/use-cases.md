@@ -28,7 +28,7 @@ Agents need structured, verifiable answers — not hallucinated file paths.
 
 | Task | Query | Notes |
 |------|-------|-------|
-| Go to definition | `symbol:name=foo path:src/**` | Phase 5 LSP adapter |
+| Go to definition | `symbol:name=foo path:src/**` | `lsp-adapter` capability |
 | Find references | `refs:to=sym://...` | Same index as CLI |
 | Call hierarchy | `callers:of=sym://... depth=3` | Structural graph |
 | Symbol search | `symbol:name=*Auth* kind=function` | Fuzzy via tantivy |
@@ -55,7 +55,7 @@ codesift query "refs:to=sym://abc123" --format json > impact.json
 codesift provides a **substrate**, not a rule engine:
 
 - PSI/AST per file for pluggable analyzers
-- Symbol graph for inter-procedural rules (Phase 2+)
+- Symbol graph for inter-procedural rules (`structural-depth`+)
 - JSONL export for external tools
 
 Analyzers register over the index API (future) rather than re-parsing the repo.
@@ -71,6 +71,7 @@ Analyzers register over the index API (future) rather than re-parsing the repo.
 
 ## See also
 
+- [capabilities.md](capabilities.md) — feature coverage
 - [specs/mcp.md](specs/mcp.md) — MCP tool catalog
 - [specs/cli.md](specs/cli.md) — CLI commands
 - [specs/query-language.md](specs/query-language.md) — query grammar

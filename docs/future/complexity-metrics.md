@@ -36,7 +36,7 @@ Instead of Big-O, ship **structural hints** as separate findings when useful (e.
 - **+1** per `catch` / `?` early-exit that branches control (Rust: `?` counts as +1 when it exits the function)
 - **Do not** count macro-expanded code unless expanded in PSI
 
-**Scope:** Per **function**, **method**, **closure** (optional Phase 2+). Not whole-file unless aggregating for module summary.
+**Scope:** Per **function**, **method**, **closure** (closures optional later). Not whole-file unless aggregating for module summary.
 
 ### Cognitive complexity (Sonar-style)
 
@@ -57,11 +57,11 @@ Cognitive complexity correlates better with “hard to change safely” than cyc
 PSI / AST  →  CFG builder (per language)  →  metric pass  →  index record + findings
 ```
 
-| Prerequisite | Phase |
-|--------------|-------|
-| Function boundaries from symbol index | Phase 1 |
-| Intra-procedural CFG (Rust first) | Phase 5+ / analysis crate |
-| Multi-language CFG (tree-sitter) | Phase 4+ backends |
+| Prerequisite | Capability |
+|--------------|------------|
+| Function boundaries from symbol index | `structural-index-rust` |
+| Intra-procedural CFG (Rust first) | `cfg-analysis` |
+| Multi-language CFG (tree-sitter) | `multi-language` |
 
 Rust MVP path: build CFG from `ra_ap_syntax` or HIR-lite over PSI; tree-sitter languages use simplified CFG (may under-count macros).
 
@@ -160,14 +160,16 @@ These use `severity: info` unless combined with high cognitive score.
 4. search_semantic("similar simple handler") → idiomatic alternative
 ```
 
-## Roadmap placement
+## Coverage
 
-| Milestone | Deliverable |
-|-----------|-------------|
-| Phase 5+ | CFG builder for Rust functions |
-| Phase 6 (proposed) | `complexity` keyspace, `get_complexity`, query filters |
-| Phase 6+ | Threshold inspections in `run_inspections` |
-| Phase 4+ | tree-sitter CFG backends (reduced fidelity) |
+| Capability | Deliverable |
+|------------|-------------|
+| `cfg-analysis` | CFG builder for Rust functions |
+| `complexity-metrics` | `complexity` keyspace, `get_complexity`, query filters |
+| `inspections-unified` | Threshold inspections in `run_inspections` |
+| `multi-language` | tree-sitter CFG backends (reduced fidelity) |
+
+Promote to [capabilities.md](../capabilities.md) when `spec-accepted`.
 
 ## See also
 

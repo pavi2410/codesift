@@ -9,7 +9,7 @@ How codesift parses source into a PSI-like layer. See ADR-0003.
 | Language phase | Parser | Rationale |
 |----------------|--------|-----------|
 | Rust (MVP) | `ra_ap_syntax` | Lossless CST, incremental reparse, edition-aware |
-| Multi-lang (Phase 4) | tree-sitter | Broad grammar coverage, incremental |
+| Multi-lang (`multi-language`) | tree-sitter | Broad grammar coverage, incremental |
 | Markdown / docs | tree-sitter-markdown or custom | Section extraction |
 
 **Not used:** `syn` — not incremental; unsuitable for watch-mode indexing.

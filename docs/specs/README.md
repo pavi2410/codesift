@@ -16,4 +16,4 @@ Each spec has a status: `draft` | `accepted` | `deprecated`.
 | [cli.md](cli.md) | draft | CLI commands and output |
 | [mcp.md](mcp.md) | draft | MCP tools and schemas |
 
-**Reading order for implementers:** symbol-model → index-schema → storage → query-language → interfaces
+**Reading order for implementers:** [capabilities.md](../capabilities.md) → symbol-model → index-schema → storage → query-language → interfaces

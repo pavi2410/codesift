@@ -1,10 +1,12 @@
-# Phase 2 Structural Depth
+# Structural Depth
 
-**Status:** planned
+**Capability:** `structural-depth`  
+**Status:** spec-draft  
+**Prerequisite:** `structural-index-rust`
 
-Extends structural indexing before or alongside semantic/MCP work (roadmap Phase 2).
+Extends the structural graph: imports, trait impls, workspace cross-crate resolution. Can be implemented in parallel with `semantic-search` / `mcp-server` once the base index exists.
 
-## Goals
+## Covered
 
 | Feature | Description |
 |---------|-------------|
@@ -37,13 +39,13 @@ For Cargo workspaces:
 2. Import graph export includes cross-crate edges in workspace
 3. Unresolved refs reported in `file_state.parse_errors` or ref records
 
-## Dependencies
+## Prerequisites
 
-- Phase 1 MVP complete
+- `structural-index-rust` verified
 - Cargo metadata parsing in `codesift-core`
 
 ## See also
 
+- [capabilities.md](../capabilities.md)
 - [structural-indexing.md](../techniques/structural-indexing.md)
 - [symbol-model.md](../specs/symbol-model.md)
-- [roadmap.md](../roadmap.md)

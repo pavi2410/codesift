@@ -33,7 +33,7 @@ How codesift relates to existing tools. codesift is **complementary**, not a dro
 | Remote repos | `codedb_remote` via cloud | Local-first; [PURL library docs](../future/purl-library-docs.md) (integrate-first) |
 | Ecosystem | Pairs with [muonry](https://codegraff.com) for edits + instant index sync | Index/analyze; refactor **preview** — apply via LSP / ast-grep |
 
-**Relationship:** Direct competitor on **Phase 1–3 structural MCP** (symbols, deps, fast agent queries). codesift differentiates on **semantic retrieval**, **deeper IntelliJ-style analysis**, and **local dependency intelligence**. Benchmarks and token efficiency in codedb’s blog are a useful bar for codesift MCP design.
+**Relationship:** Direct competitor on **structural MCP** (`structural-index-rust`, `mcp-core-tools`, `incremental-watch`). codesift differentiates on **semantic retrieval**, **deeper IntelliJ-style analysis**, and **local dependency intelligence**. Benchmarks and token efficiency in codedb’s blog are a useful bar for codesift MCP design.
 
 ## ast-grep
 

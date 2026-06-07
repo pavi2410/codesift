@@ -18,7 +18,7 @@ codesift needs incremental, error-tolerant parsing for multiple languages. Rust 
 
 ### Positive
 
-- tree-sitter provides broad language coverage for Phase 4
+- tree-sitter provides broad language coverage for `multi-language` capability
 - ra_ap_syntax gives best-in-class Rust structure for MVP
 - Both support incremental reparse for watch mode
 - tree-sitter query DSL is maintainable for symbol extraction

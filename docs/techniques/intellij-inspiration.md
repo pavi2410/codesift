@@ -37,7 +37,7 @@ IntelliJ re-indexes only affected files on change. codesift uses the same princi
 | Type inference | Requires compiler integration per language |
 | Resolve to typed symbols | Cross-crate, macro expansion complexity |
 | Refactoring engine | Needs resolve + PSI rewrite |
-| Inspections / intentions | IDE UX; codesift exposes data for external analyzers |
+| Inspections / intentions | Unified via adapters (`inspections-unified`); not a full IDE intention UI |
 | Plugin ecosystem | Future; MCP/CLI first |
 
 ## Design lesson: index everything queryable

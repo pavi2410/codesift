@@ -42,7 +42,7 @@ Syntax-level references (not type-resolved):
 
 1. Extract `use` and `mod` statements
 2. Create `imports` edges: module → target module/symbol
-3. Used for cross-file invalidation and Phase 2 scope resolution
+3. Used for cross-file invalidation and `structural-depth` scope resolution
 
 ## Indexing order (full build)
 

@@ -40,7 +40,7 @@ Semantic search requires embedding generation. codesift prioritizes offline oper
 | OpenAI / remote APIs | Privacy, latency, offline requirement |
 | candle-only custom | More DIY; fastembed already wraps ONNX |
 | Ollama subprocess | Extra process dependency |
-| BGE-M3 only | Heavier; defer sparse+dense to Phase 2 |
+| BGE-M3 only | Heavier; defer sparse+dense to `semantic-search` enhancement |
 
 ## References
 

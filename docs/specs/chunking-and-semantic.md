@@ -53,7 +53,7 @@ After usearch + tantivy fusion:
 | Recency | file indexed in last hour | +0.05 |
 | Kind match | filter `kind=function` and chunk is function | +0.05 |
 
-## Phase 2: BGE-M3 sparse+dense
+## Optional: BGE-M3 sparse+dense (`semantic-search` enhancement)
 
 Optional `fastembed` BGE-M3 for hybrid sparse+dense in single model. Deferred until MVP semantic search validated.
 

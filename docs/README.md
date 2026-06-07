@@ -7,7 +7,7 @@ Documentation index and reading paths.
 | I want to… | Start here |
 |------------|------------|
 | Understand what codesift is | [vision.md](vision.md) → [big-picture.md](big-picture.md) |
-| See the delivery plan | [roadmap.md](roadmap.md) |
+| See feature coverage | [capabilities.md](capabilities.md) |
 | Implement a component | [specs/README.md](specs/README.md) |
 | Understand a design decision | [adr/README.md](adr/README.md) |
 | Look up a term | [glossary.md](glossary.md) |
@@ -21,7 +21,7 @@ Documentation index and reading paths.
 2. [vision.md](vision.md) — problem and solution
 3. [big-picture.md](big-picture.md) — long-term intelligence for agents
 4. [use-cases.md](use-cases.md) — who uses this
-5. [roadmap.md](roadmap.md) — what's built when
+5. [capabilities.md](capabilities.md) — feature coverage matrix
 
 ### Contributor (1 hour)
 
@@ -55,14 +55,15 @@ Documentation index and reading paths.
 ```
 docs/
 ├── vision.md, big-picture.md, goals-and-non-goals.md, use-cases.md, glossary.md
-├── roadmap.md
+├── capabilities.md   # Feature coverage (primary planning doc)
+├── roadmap.md        # Pointer to capabilities.md
 ├── architecture/     # System design
 ├── specs/            # Implementation contracts
 ├── techniques/       # Algorithms and rationale
 ├── adr/              # Architecture decisions
 ├── references/       # External links and comparisons
 ├── future/           # Exploring ideas (not accepted specs)
-└── milestones/       # Phase acceptance criteria
+└── milestones/       # Per-capability acceptance criteria
 ```
 
 ## Spec status legend

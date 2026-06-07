@@ -21,4 +21,4 @@ High-SNR candidates promoted from design discussion. See [big-picture.md](../big
 ## See also
 
 - [big-picture.md](../big-picture.md) — analysis layers and agent quality dimensions
-- [roadmap.md](../roadmap.md) — near-term phases 0–5
+- [capabilities.md](../capabilities.md) — feature coverage matrix
