@@ -1,5 +1,7 @@
 # Use Cases
 
+> **Type:** product · **Audience:** newcomer · **Read when:** you need concrete consumer examples
+
 Each consumer interacts with the same underlying index through CLI or MCP. Examples below use planned query syntax; see [specs/query-language.md](../specs/query-language.md).
 
 ## AI coding agents (MCP)

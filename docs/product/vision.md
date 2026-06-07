@@ -1,5 +1,7 @@
 # Vision
 
+> **Type:** product · **Audience:** newcomer · **Read when:** first encounter with codesift
+
 ## Problem
 
 Developers and tools need to find and reason about code across large, evolving codebases. Today this is fragmented:

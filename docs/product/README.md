@@ -8,7 +8,7 @@ Why codesift exists, who it serves, and long-term strategy. **Feature coverage**
 2. [use-cases.md](use-cases.md) — who uses codesift
 3. [../capabilities.md](../capabilities.md) — feature coverage matrix
 4. [goals-and-non-goals.md](goals-and-non-goals.md) — boundaries
-5. [big-picture.md](big-picture.md) — optional: long-term intelligence for agents
+5. [big-picture.md](big-picture.md) — optional: long-term analysis strategy
 
 ## Documents
 
@@ -17,7 +17,7 @@ Why codesift exists, who it serves, and long-term strategy. **Feature coverage**
 | [vision.md](vision.md) | Concise north star: problem, solution, principles |
 | [use-cases.md](use-cases.md) | Consumers: agents, CI, IDE, SAST |
 | [goals-and-non-goals.md](goals-and-non-goals.md) | In scope / out of scope |
-| [big-picture.md](big-picture.md) | Analysis layers, quality dimensions, agent workflows |
+| [big-picture.md](big-picture.md) | Analysis layers, build-vs-integrate strategy |
 
 ## Related
 

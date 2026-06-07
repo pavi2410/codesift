@@ -111,6 +111,22 @@ Standard protocol for AI tools. codesift exposes search and symbol tools via `rm
 
 Command-line interface (`codesift` binary) for index, query, search, and export.
 
+## Status terms
+
+Three vocabularies track the same lifecycle at different granularity. See [README.md](README.md#status-legends).
+
+### Capability status
+
+Used in [capabilities.md](capabilities.md): `exploring`, `spec-draft`, `spec-accepted`, `not-started`, `implemented`, `verified`.
+
+### Spec status
+
+Used in [specs/](specs/): `draft`, `accepted`, `deprecated`.
+
+### Future idea status
+
+Used in [future/](future/): `raw`, `exploring`, `spec-candidate`, `accepted` (promoted elsewhere).
+
 ## See also
 
 - [techniques/intellij-inspiration.md](techniques/intellij-inspiration.md)

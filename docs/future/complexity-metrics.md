@@ -2,7 +2,7 @@
 
 **Status:** exploring
 
-Cyclomatic and cognitive complexity per function/method — grounded metrics agents can use for impact analysis and quality gates. Part of **Layer 2 — Quality signals** in [big-picture.md](../product/big-picture.md).
+Cyclomatic and cognitive complexity per function/method — grounded metrics agents can use for impact analysis and quality gates. Capability: `complexity-metrics` (Layer 2 in [capabilities.md](../capabilities.md#layer-mapping-big-picture)).
 
 ## Goals
 
@@ -173,6 +173,6 @@ Promote to [capabilities.md](../capabilities.md) when `spec-accepted`.
 
 ## See also
 
-- [big-picture.md](../product/big-picture.md) — Layer 2 quality signals
+- [inspections-and-findings.md](inspections-and-findings.md) — related analysis-layer sketches
 - [specs/symbol-model.md](../specs/symbol-model.md) — symbol IDs for evidence links
 - [specs/index-schema.md](../specs/index-schema.md) — storage patterns

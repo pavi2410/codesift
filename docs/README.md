@@ -10,18 +10,18 @@ Documentation index and reading paths.
 | See feature coverage | [capabilities.md](capabilities.md) |
 | Implement a component | [specs/README.md](specs/README.md) |
 | Understand a design decision | [adr/README.md](adr/README.md) |
-| Look up a term | [glossary.md](glossary.md) |
+| Look up a term or status | [glossary.md](glossary.md) |
 | Explore future ideas | [future/README.md](future/README.md) |
 
 ## Reading paths
 
-### Newcomer (15 minutes)
+### Newcomer (10 minutes)
 
-1. [../README.md](../README.md) — project pitch
-2. [product/vision.md](product/vision.md) — problem and solution
-3. [product/use-cases.md](product/use-cases.md) — who uses this
-4. [capabilities.md](capabilities.md) — feature coverage matrix
-5. [product/big-picture.md](product/big-picture.md) — optional: long-term intelligence
+1. [product/vision.md](product/vision.md) — problem and solution
+2. [product/use-cases.md](product/use-cases.md) — who uses this
+3. [capabilities.md](capabilities.md) — feature coverage matrix
+
+Optional: [product/big-picture.md](product/big-picture.md) — long-term analysis strategy
 
 ### Contributor (1 hour)
 
@@ -40,7 +40,8 @@ Documentation index and reading paths.
 5. [specs/query-language.md](specs/query-language.md)
 6. [specs/cli.md](specs/cli.md) and [specs/mcp.md](specs/mcp.md)
 7. [architecture/future-crate-layout.md](architecture/future-crate-layout.md)
-8. Relevant [adr/](adr/) for your area
+8. Relevant [milestones/](milestones/) for your capability (when present)
+9. Relevant [adr/](adr/) for your area
 
 ### Deep dive (techniques)
 
@@ -66,13 +67,25 @@ docs/
 └── milestones/       # Per-capability acceptance criteria
 ```
 
-## Spec status legend
+## Status legends
 
-| Status | Meaning |
-|--------|---------|
-| draft | Written; may change before implementation |
-| accepted | Locked for implementation |
-| deprecated | Superseded; do not implement |
+Three vocabularies — same lifecycle, different granularity. Full definitions: [glossary.md](glossary.md#status-terms).
+
+| Context | Terms | Used in |
+|---------|-------|---------|
+| **Capability** | `exploring` → `spec-draft` → `spec-accepted` → `not-started` → `implemented` → `verified` | [capabilities.md](capabilities.md) |
+| **Spec** | `draft` → `accepted` → `deprecated` | [specs/](specs/) |
+| **Future idea** | `raw` → `exploring` → `spec-candidate` → promoted | [future/](future/) |
+
+## Doc conventions
+
+Each major doc may include a header block:
+
+```markdown
+> **Type:** product | spec | technique | adr | reference | milestone | future
+> **Audience:** newcomer | contributor | implementer
+> **Read when:** …
+```
 
 ## See also
 

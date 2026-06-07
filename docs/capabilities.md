@@ -15,6 +15,8 @@ Implementation sequence is a project-management choice (issues, board). This mat
 | `implemented` | Code exists; may lack full verification |
 | `verified` | Meets acceptance criteria in [milestones/](milestones/) |
 
+Other status vocabularies (specs, future ideas): [glossary.md](glossary.md#status-terms).
+
 ## Coverage prerequisites
 
 Capabilities may depend on others (**logical** coverage, not schedule):
@@ -40,9 +42,9 @@ lockfile-resolution ───► purl-library-docs
 
 | ID | Capability | Spec / doc | Prerequisite | Status |
 |----|------------|------------|--------------|--------|
-| `structural-index-rust` | Rust symbols, refs, callers; persistent `.codesift/` | [symbol-model](specs/symbol-model.md), [index-schema](specs/index-schema.md), [storage](specs/storage.md) | — | spec-draft |
-| `structural-depth` | Import graph, impl/trait edges, workspace cross-crate | [structural-depth](milestones/structural-depth.md), [structural-indexing](techniques/structural-indexing.md) | `structural-index-rust` | spec-draft |
-| `semantic-search` | Chunking, embeddings, hybrid BM25+vector | [chunking-and-semantic](specs/chunking-and-semantic.md), [semantic-retrieval](techniques/semantic-retrieval.md) | `structural-index-rust` | spec-draft |
+| `structural-index-rust` | Rust symbols, refs, callers; persistent `.codesift/` | [symbol-model](specs/symbol-model.md) | — | spec-draft |
+| `structural-depth` | Import graph, impl/trait edges, workspace cross-crate | [structural-depth](milestones/structural-depth.md) | `structural-index-rust` | spec-draft |
+| `semantic-search` | Chunking, embeddings, hybrid BM25+vector | [chunking-and-semantic](specs/chunking-and-semantic.md) | `structural-index-rust` | spec-draft |
 | `incremental-watch` | File watcher, invalidation graph, sub-second updates | [incremental-indexing](specs/incremental-indexing.md) | `structural-index-rust` | spec-draft |
 | `multi-language` | tree-sitter PSI for TS, Python, Go | [multi-language-strategy](techniques/multi-language-strategy.md) | `structural-index-rust` | spec-draft |
 | `vfs-workspace` | gitignore walk, hashing, workspace roots | [vfs-and-workspace](specs/vfs-and-workspace.md) | — | spec-draft |
@@ -51,11 +53,11 @@ lockfile-resolution ───► purl-library-docs
 
 | ID | Capability | Spec / doc | Prerequisite | Status |
 |----|------------|------------|--------------|--------|
-| `cli-structural` | `index`, `query`, `symbol`, `refs`, `status`, `export` | [cli](specs/cli.md), [structural-index-rust](milestones/structural-index-rust.md) | `structural-index-rust` | spec-draft |
+| `cli-structural` | `index`, `query`, `symbol`, `refs`, `status`, `export` | [cli](specs/cli.md) | `structural-index-rust` | spec-draft |
 | `cli-search` | `search` hybrid command | [cli](specs/cli.md) | `semantic-search` | spec-draft |
 | `mcp-core-tools` | `index_status`, `query_structural`, `get_symbol`, `find_references`, `get_callers` | [mcp](specs/mcp.md) | `structural-index-rust` | spec-draft |
 | `mcp-semantic-tools` | `search_semantic`, `read_chunk` | [mcp](specs/mcp.md) | `semantic-search` | spec-draft |
-| `mcp-server` | `codesift mcp` stdio transport | [mcp](specs/mcp.md), ADR-0005 | `mcp-core-tools` | spec-draft |
+| `mcp-server` | `codesift mcp` stdio transport | [mcp](specs/mcp.md) | `mcp-core-tools` | spec-draft |
 | `lsp-adapter` | Symbol search via LSP | [use-cases](product/use-cases.md) | `structural-index-rust` | exploring |
 | `library-api` | Embeddable Rust API for IDEs | [future-crate-layout](architecture/future-crate-layout.md) | `structural-index-rust` | exploring |
 
@@ -63,14 +65,14 @@ lockfile-resolution ───► purl-library-docs
 
 | ID | Capability | Spec / doc | Prerequisite | Status |
 |----|------------|------------|--------------|--------|
-| `analyzer-hooks` | JSONL export, pluggable rules over PSI | [use-cases](product/use-cases.md), [big-picture](product/big-picture.md) | `structural-index-rust` | exploring |
-| `inspections-unified` | Adapter findings (Clippy, Semgrep, …) on `sym://` | [big-picture](product/big-picture.md) Layer 3 | `structural-index-rust` | exploring |
-| `quality-signals` | Duplicates, dead-code candidates, doc drift | [big-picture](product/big-picture.md) Layer 2 | `semantic-search` | exploring |
+| `analyzer-hooks` | JSONL export, pluggable rules over PSI | [inspections-and-findings](future/inspections-and-findings.md) | `structural-index-rust` | exploring |
+| `inspections-unified` | Adapter findings (Clippy, Semgrep, …) on `sym://` | [inspections-and-findings](future/inspections-and-findings.md) | `structural-index-rust` | exploring |
+| `quality-signals` | Duplicates, dead-code candidates, doc drift | [inspections-and-findings](future/inspections-and-findings.md) | `semantic-search` | exploring |
 | `cfg-analysis` | Intra-procedural CFG (Rust first) | [complexity-metrics](future/complexity-metrics.md) | `structural-index-rust` | exploring |
 | `complexity-metrics` | Cyclomatic + cognitive per function | [complexity-metrics](future/complexity-metrics.md) | `cfg-analysis` | exploring |
-| `dataflow-lite` | Flow summaries, taint hints | [big-picture](product/big-picture.md) Layer 5 | `cfg-analysis` | exploring |
-| `refactor-preview` | `preview_rename`, impact before apply | [big-picture](product/big-picture.md) Layer 6 | `structural-depth` | exploring |
-| `entry-discovery` | Manifest index, `bootstrap` / `entrypoint:` | [big-picture](product/big-picture.md) | `structural-index-rust`, `semantic-search` | exploring |
+| `dataflow-lite` | Flow summaries, taint hints | [inspections-and-findings](future/inspections-and-findings.md) | `cfg-analysis` | exploring |
+| `refactor-preview` | `preview_rename`, impact before apply | [inspections-and-findings](future/inspections-and-findings.md) | `structural-depth` | exploring |
+| `entry-discovery` | Manifest index, `bootstrap` / `entrypoint:` | [inspections-and-findings](future/inspections-and-findings.md) | `structural-index-rust`, `semantic-search` | exploring |
 
 ### Platform
 

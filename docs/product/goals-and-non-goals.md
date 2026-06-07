@@ -1,5 +1,7 @@
 # Goals and Non-Goals
 
+> **Type:** product · **Audience:** contributor · **Read when:** scoping work or evaluating proposals
+
 ## Goals
 
 ### Structural indexing
@@ -54,4 +56,4 @@ One index serves:
 
 What we build and verify is tracked in [capabilities.md](../capabilities.md) — by feature, not timeline. Acceptance criteria live in [milestones/](../milestones/).
 
-Long-term analysis goals (inspections, duplicates, data flow, agent quality gates) are in [big-picture.md](big-picture.md); many are `exploring` until promoted to the coverage matrix.
+Long-term analysis goals (inspections, duplicates, data flow, agent quality gates) are in [big-picture.md](big-picture.md) and [future/inspections-and-findings.md](../future/inspections-and-findings.md); many are `exploring` until promoted to the coverage matrix.
