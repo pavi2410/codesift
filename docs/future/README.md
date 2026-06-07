@@ -2,7 +2,7 @@
 
 **Status:** scratchpad — not accepted specs. Ideas here are **directional**; promote to [specs/](../specs/README.md) or [adr/](../adr/README.md) when ready to implement.
 
-High-SNR candidates promoted from design discussion. See [big-picture.md](../big-picture.md) for how they fit the long-term vision.
+High-SNR candidates promoted from design discussion. See [big-picture.md](../product/big-picture.md) for how they fit the long-term vision.
 
 | Document | Status | Summary |
 |----------|--------|---------|
@@ -20,5 +20,5 @@ High-SNR candidates promoted from design discussion. See [big-picture.md](../big
 
 ## See also
 
-- [big-picture.md](../big-picture.md) — analysis layers and agent quality dimensions
+- [big-picture.md](../product/big-picture.md) — analysis layers and agent quality dimensions
 - [capabilities.md](../capabilities.md) — feature coverage matrix

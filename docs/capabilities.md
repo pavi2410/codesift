@@ -56,28 +56,28 @@ lockfile-resolution ───► purl-library-docs
 | `mcp-core-tools` | `index_status`, `query_structural`, `get_symbol`, `find_references`, `get_callers` | [mcp](specs/mcp.md) | `structural-index-rust` | spec-draft |
 | `mcp-semantic-tools` | `search_semantic`, `read_chunk` | [mcp](specs/mcp.md) | `semantic-search` | spec-draft |
 | `mcp-server` | `codesift mcp` stdio transport | [mcp](specs/mcp.md), ADR-0005 | `mcp-core-tools` | spec-draft |
-| `lsp-adapter` | Symbol search via LSP | [use-cases](use-cases.md) | `structural-index-rust` | exploring |
+| `lsp-adapter` | Symbol search via LSP | [use-cases](product/use-cases.md) | `structural-index-rust` | exploring |
 | `library-api` | Embeddable Rust API for IDEs | [future-crate-layout](architecture/future-crate-layout.md) | `structural-index-rust` | exploring |
 
 ### Analysis and intelligence
 
 | ID | Capability | Spec / doc | Prerequisite | Status |
 |----|------------|------------|--------------|--------|
-| `analyzer-hooks` | JSONL export, pluggable rules over PSI | [use-cases](use-cases.md), [big-picture](big-picture.md) | `structural-index-rust` | exploring |
-| `inspections-unified` | Adapter findings (Clippy, Semgrep, …) on `sym://` | [big-picture](big-picture.md) Layer 3 | `structural-index-rust` | exploring |
-| `quality-signals` | Duplicates, dead-code candidates, doc drift | [big-picture](big-picture.md) Layer 2 | `semantic-search` | exploring |
+| `analyzer-hooks` | JSONL export, pluggable rules over PSI | [use-cases](product/use-cases.md), [big-picture](product/big-picture.md) | `structural-index-rust` | exploring |
+| `inspections-unified` | Adapter findings (Clippy, Semgrep, …) on `sym://` | [big-picture](product/big-picture.md) Layer 3 | `structural-index-rust` | exploring |
+| `quality-signals` | Duplicates, dead-code candidates, doc drift | [big-picture](product/big-picture.md) Layer 2 | `semantic-search` | exploring |
 | `cfg-analysis` | Intra-procedural CFG (Rust first) | [complexity-metrics](future/complexity-metrics.md) | `structural-index-rust` | exploring |
 | `complexity-metrics` | Cyclomatic + cognitive per function | [complexity-metrics](future/complexity-metrics.md) | `cfg-analysis` | exploring |
-| `dataflow-lite` | Flow summaries, taint hints | [big-picture](big-picture.md) Layer 5 | `cfg-analysis` | exploring |
-| `refactor-preview` | `preview_rename`, impact before apply | [big-picture](big-picture.md) Layer 6 | `structural-depth` | exploring |
-| `entry-discovery` | Manifest index, `bootstrap` / `entrypoint:` | [big-picture](big-picture.md) | `structural-index-rust`, `semantic-search` | exploring |
+| `dataflow-lite` | Flow summaries, taint hints | [big-picture](product/big-picture.md) Layer 5 | `cfg-analysis` | exploring |
+| `refactor-preview` | `preview_rename`, impact before apply | [big-picture](product/big-picture.md) Layer 6 | `structural-depth` | exploring |
+| `entry-discovery` | Manifest index, `bootstrap` / `entrypoint:` | [big-picture](product/big-picture.md) | `structural-index-rust`, `semantic-search` | exploring |
 
 ### Platform
 
 | ID | Capability | Spec / doc | Prerequisite | Status |
 |----|------------|------------|--------------|--------|
 | `purl-library-docs` | Local PURL-addressed dependency doc index | [purl-library-docs](future/purl-library-docs.md) | `semantic-search`, lockfile resolution | exploring |
-| `documentation` | Vision, specs, ADRs, architecture | [docs/README](README.md) | — | spec-draft |
+| `documentation` | Product docs, specs, ADRs, architecture | [product/](product/), [README](README.md) | — | spec-draft |
 
 ## Minimum agent-usable coverage
 
@@ -102,7 +102,7 @@ Update this blurb as work shifts; it does **not** block other capabilities.
 
 ## Layer mapping (big picture)
 
-Intellectual grouping from [big-picture.md](big-picture.md) — not a schedule:
+Intellectual grouping from [big-picture.md](product/big-picture.md) — not a schedule:
 
 | Layer | Capabilities |
 |-------|--------------|
@@ -116,5 +116,6 @@ Intellectual grouping from [big-picture.md](big-picture.md) — not a schedule:
 ## See also
 
 - [milestones/](milestones/) — acceptance criteria per capability area
-- [goals-and-non-goals.md](goals-and-non-goals.md) — boundaries
+- [product/](product/) — vision, use cases, boundaries, strategy
+- [goals-and-non-goals.md](product/goals-and-non-goals.md) — boundaries
 - [future/](future/) — exploring ideas before promotion here

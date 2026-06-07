@@ -222,4 +222,4 @@ Truncate with `"truncated": true` field when exceeded.
 - [capabilities.md](../capabilities.md)
 - [cli.md](cli.md)
 - [query-language.md](query-language.md)
-- [../use-cases.md](../use-cases.md)
+- [../product/use-cases.md](../product/use-cases.md)

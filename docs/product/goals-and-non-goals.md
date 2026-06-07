@@ -52,6 +52,6 @@ One index serves:
 
 ## Capability coverage
 
-What we build and verify is tracked in [capabilities.md](capabilities.md) — by feature, not timeline. Acceptance criteria live in [milestones/](milestones/).
+What we build and verify is tracked in [capabilities.md](../capabilities.md) — by feature, not timeline. Acceptance criteria live in [milestones/](../milestones/).
 
 Long-term analysis goals (inspections, duplicates, data flow, agent quality gates) are in [big-picture.md](big-picture.md); many are `exploring` until promoted to the coverage matrix.

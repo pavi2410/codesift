@@ -41,7 +41,7 @@ How codesift relates to existing tools. codesift is **complementary**, not a dro
 
 **Overlap:** Both work above raw text — ast-grep matches syntax trees; codesift builds symbol graphs and PSI-like structure.
 
-**Difference:** ast-grep is **on-demand**: each run parses and matches. codesift **indexes once** (incrementally) and answers graph queries (`callers:`, `refs:`) and semantic search across sessions. ast-grep **mutates** code; codesift **observes** changes and re-indexes (refactor preview only, per [big-picture.md](../big-picture.md)).
+**Difference:** ast-grep is **on-demand**: each run parses and matches. codesift **indexes once** (incrementally) and answers graph queries (`callers:`, `refs:`) and semantic search across sessions. ast-grep **mutates** code; codesift **observes** changes and re-indexes (refactor preview only, per [big-picture.md](../product/big-picture.md)).
 
 **Relationship:** **Complementary.** Typical split:
 
@@ -95,8 +95,8 @@ Cloud-hosted, shallow. codesift works on local/private repos offline.
 
 ## See also
 
-- [vision.md](../vision.md)
-- [big-picture.md](../big-picture.md)
-- [goals-and-non-goals.md](../goals-and-non-goals.md)
+- [vision.md](../product/vision.md)
+- [big-picture.md](../product/big-picture.md)
+- [goals-and-non-goals.md](../product/goals-and-non-goals.md)
 - [codedb blog — code intelligence for agents](https://codegraff.com/blog/codedb-code-intelligence)
 - [ast-grep documentation](https://ast-grep.github.io/)

@@ -4,7 +4,7 @@ Thank you for your interest in contributing. This project is currently in the **
 
 ## Getting started
 
-1. Read [docs/vision.md](docs/vision.md) and [docs/capabilities.md](docs/capabilities.md) for context.
+1. Read [docs/product/vision.md](docs/product/vision.md) and [docs/capabilities.md](docs/capabilities.md) for context.
 2. Browse [docs/README.md](docs/README.md) for curated reading paths.
 3. Check open issues and [docs/capabilities.md](docs/capabilities.md) before starting work.
 

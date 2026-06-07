@@ -220,4 +220,4 @@ Promote to [capabilities.md](../capabilities.md) when `spec-accepted`.
 - [specs/chunking-and-semantic.md](../specs/chunking-and-semantic.md) — chunk and embed pipeline
 - [specs/storage.md](../specs/storage.md) — workspace index layout
 - [references/comparable-tools.md](../references/comparable-tools.md) — Context7 / codedb positioning
-- [big-picture.md](../big-picture.md) — local dependency intelligence
+- [big-picture.md](../product/big-picture.md) — local dependency intelligence

@@ -23,8 +23,8 @@ codesift indexes source code and documentation into a persistent, incremental in
 
 ## Quick links
 
-- [Vision](docs/vision.md) — problem, solution, success criteria
-- [Big picture](docs/big-picture.md) — long-term code intelligence for agents
+- [Product docs](docs/product/README.md) — vision, use cases, strategy
+- [Vision](docs/product/vision.md) — problem, solution, success criteria
 - [Capabilities](docs/capabilities.md) — feature coverage matrix
 - [Architecture](docs/architecture/overview.md) — system design
 - [Specs](docs/specs/README.md) — implementation contracts

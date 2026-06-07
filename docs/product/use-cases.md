@@ -1,6 +1,6 @@
 # Use Cases
 
-Each consumer interacts with the same underlying index through CLI or MCP. Examples below use planned query syntax; see [specs/query-language.md](specs/query-language.md).
+Each consumer interacts with the same underlying index through CLI or MCP. Examples below use planned query syntax; see [specs/query-language.md](../specs/query-language.md).
 
 ## AI coding agents (MCP)
 
@@ -71,7 +71,7 @@ Analyzers register over the index API (future) rather than re-parsing the repo.
 
 ## See also
 
-- [capabilities.md](capabilities.md) — feature coverage
-- [specs/mcp.md](specs/mcp.md) — MCP tool catalog
-- [specs/cli.md](specs/cli.md) — CLI commands
-- [specs/query-language.md](specs/query-language.md) — query grammar
+- [capabilities.md](../capabilities.md) — feature coverage
+- [specs/mcp.md](../specs/mcp.md) — MCP tool catalog
+- [specs/cli.md](../specs/cli.md) — CLI commands
+- [specs/query-language.md](../specs/query-language.md) — query grammar

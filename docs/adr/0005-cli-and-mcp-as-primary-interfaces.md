@@ -43,4 +43,4 @@ codesift serves developers (CLI, CI), AI agents (MCP), and future IDE plugins. W
 
 - [cli.md](../specs/cli.md)
 - [mcp.md](../specs/mcp.md)
-- [use-cases.md](../use-cases.md)
+- [use-cases.md](../product/use-cases.md)

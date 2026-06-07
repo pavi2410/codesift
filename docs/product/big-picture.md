@@ -12,7 +12,7 @@ For the concise problem statement and near-term solution, see [vision.md](vision
 
 > **codesift is IntelliJ for agents** — the **brain and engine**, not the GUI. It provides the indexing, analysis, heuristics, and quality intelligence that make JetBrains IDEs indispensable, exposed as MCP tools and CLI for any agent or CI pipeline.
 
-Today codesift is scoped as an **index + query engine** (see [capabilities.md](capabilities.md)). This document defines the **analysis pillar** that grows on top of that foundation: inspections, quality signals, data-flow hints, and refactor intelligence — **exported for agents and CI**, not locked inside an editor.
+Today codesift is scoped as an **index + query engine** (see [capabilities.md](../capabilities.md)). This document defines the **analysis pillar** that grows on top of that foundation: inspections, quality signals, data-flow hints, and refactor intelligence — **exported for agents and CI**, not locked inside an editor.
 
 ## What agents should write (quality dimensions)
 
@@ -24,7 +24,7 @@ codesift exists so agents produce code that is not merely syntactically valid, b
 | **Correct** | Behavior matches intent; types and refs resolve; no broken callers | Symbol resolve; `find_references` / `get_callers`; type-aware analysis (phased); tests impact preview |
 | **Safe** | No panics, unwraps, races, or undefined behavior where avoidable | Language linters (Clippy, etc.); nil/null/optional flow; reachability |
 | **Secure** | No injection, leaks, or trust-boundary violations | Data-flow / taint analysis; security rule adapters (Semgrep); sensitive API path tracing |
-| **Performant** | Avoid obvious hot-path mistakes | [Cyclomatic/cognitive complexity](future/complexity-metrics.md); structural hints (nested loops); allocation inspections (phased) |
+| **Performant** | Avoid obvious hot-path mistakes | [Cyclomatic/cognitive complexity](../future/complexity-metrics.md); structural hints (nested loops); allocation inspections (phased) |
 | **Efficient** | Appropriate algorithms, data structures, and resource use | Duplicate detection; dead code removal candidates; complexity thresholds |
 | **Scalable** | Fits architecture; no accidental coupling or unbounded growth | Import/call graph; blast radius; module boundary inspections; cross-service impact |
 
@@ -88,7 +88,7 @@ A **code intelligence engine**:
 | Replacing language servers | Complementary; LSP types and diagnostics, codesift indexes and analyzes at scale |
 | Cloning Qodana / IntelliJ inspections overnight | Decades of per-language depth; integrate and grow incrementally |
 
-See [goals-and-non-goals.md](goals-and-non-goals.md) for boundaries. This document describes **where we are going**; coverage status is in [capabilities.md](capabilities.md).
+See [goals-and-non-goals.md](goals-and-non-goals.md) for boundaries. This document describes **where we are going**; coverage status is in [capabilities.md](../capabilities.md).
 
 ## Architecture: index foundation + analysis layer
 
@@ -159,7 +159,7 @@ JetBrains IDEs combine parsing, resolve, indexes, and global analysis. codesift 
 | Safe rename | Impact preview | `preview_rename` (planned); apply elsewhere |
 | Qodana-style gates | Severity thresholds in CI | `codesift check` (planned) |
 
-Deep dive on index mapping: [techniques/intellij-inspiration.md](techniques/intellij-inspiration.md).
+Deep dive on index mapping: [techniques/intellij-inspiration.md](../techniques/intellij-inspiration.md).
 
 ## Layered intelligence roadmap
 
@@ -167,12 +167,12 @@ Intelligence deepens in layers. Each layer stops a class of agent mistakes.
 
 ### Layer 1 — Discovery
 
-**Capabilities:** `structural-index-rust`, `semantic-search`, `mcp-*`, `cli-*` — see [capabilities.md](capabilities.md).
+**Capabilities:** `structural-index-rust`, `semantic-search`, `mcp-*`, `cli-*` — see [capabilities.md](../capabilities.md).
 
 Agents stop wandering blind. They get stable `sym://` IDs and verified locations.
 
-- [specs/query-language.md](specs/query-language.md)
-- [specs/mcp.md](specs/mcp.md)
+- [specs/query-language.md](../specs/query-language.md)
+- [specs/mcp.md](../specs/mcp.md)
 - [use-cases.md](use-cases.md) — agent workflows
 
 ### Layer 2 — Quality signals
@@ -181,7 +181,7 @@ Language-agnostic or lightly language-aware:
 
 - Near-duplicate / clone clusters (semantic + fingerprint)
 - Unreferenced exports and symbols (index-backed)
-- [Cyclomatic and cognitive complexity](future/complexity-metrics.md) per function (CFG-backed)
+- [Cyclomatic and cognitive complexity](../future/complexity-metrics.md) per function (CFG-backed)
 - Doc vs implementation drift (semantic)
 
 **Stops:** copy-paste slop and obvious dead weight.
@@ -247,7 +247,7 @@ Agents must not assume conventions like `fn main`. Exploration combines:
 
 Planned conveniences: `entrypoint:` query, `bootstrap` MCP tool returning ranked entry candidates (spec TBD).
 
-On **rename or refactor**, codesift does not apply edits. It **re-indexes**: old symbol IDs are tombstoned, new IDs assigned, `workspace_rev` may bump. Agents re-resolve via name/path queries; they must not hold stale `sym://` IDs across revisions. See [specs/symbol-model.md](specs/symbol-model.md) and [specs/incremental-indexing.md](specs/incremental-indexing.md).
+On **rename or refactor**, codesift does not apply edits. It **re-indexes**: old symbol IDs are tombstoned, new IDs assigned, `workspace_rev` may bump. Agents re-resolve via name/path queries; they must not hold stale `sym://` IDs across revisions. See [specs/symbol-model.md](../specs/symbol-model.md) and [specs/incremental-indexing.md](../specs/incremental-indexing.md).
 
 ## Anti-slop: agent workflow with intelligence gates
 
@@ -316,7 +316,7 @@ Finding record (conceptual):
 
 ## Relationship to capability coverage
 
-| Big-picture layer | Capability IDs (see [capabilities.md](capabilities.md)) |
+| Big-picture layer | Capability IDs (see [capabilities.md](../capabilities.md)) |
 |-------------------|--------------------------------------------------------|
 | Layer 1 — Discovery | `structural-index-rust`, `semantic-search`, `mcp-*`, `cli-*`, `entry-discovery` |
 | Layer 2 — Quality signals | `quality-signals`, `complexity-metrics` |
@@ -339,10 +339,10 @@ Finding record (conceptual):
 
 - [vision.md](vision.md) — concise problem and solution
 - [goals-and-non-goals.md](goals-and-non-goals.md) — boundaries
-- [capabilities.md](capabilities.md) — feature coverage matrix
+- [capabilities.md](../capabilities.md) — feature coverage matrix
 - [use-cases.md](use-cases.md) — consumers including agents
-- [techniques/intellij-inspiration.md](techniques/intellij-inspiration.md)
-- [references/comparable-tools.md](references/comparable-tools.md)
-- [future/complexity-metrics.md](future/complexity-metrics.md) — cyclomatic/cognitive complexity
-- [future/purl-library-docs.md](future/purl-library-docs.md) — local PURL library doc index
-- [specs/mcp.md](specs/mcp.md)
+- [techniques/intellij-inspiration.md](../techniques/intellij-inspiration.md)
+- [references/comparable-tools.md](../references/comparable-tools.md)
+- [future/complexity-metrics.md](../future/complexity-metrics.md) — cyclomatic/cognitive complexity
+- [future/purl-library-docs.md](../future/purl-library-docs.md) — local PURL library doc index
+- [specs/mcp.md](../specs/mcp.md)
