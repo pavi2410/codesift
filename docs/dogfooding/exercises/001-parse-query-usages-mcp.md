@@ -4,7 +4,9 @@
 
 ## Agent setup
 
-Launch a **new** subagent with **codesift MCP** configured (see [mcp.md](../../specs/mcp.md)). Pass **Prompt** only — no CLI query, no grep/rg, no ground-truth docs. Orchestrator scores after subagent finishes.
+Use **Agent mode with MCP enabled** (Cursor or OpenCode). Pass **Prompt** only — no CLI, no grep/rg, no ground-truth docs. Orchestrator scores after the run.
+
+**Not valid:** shell-only Task subagents (no MCP tools).
 
 **Forbidden:** grep, ripgrep, `codesift query`, reading this file or other dogfooding ground-truth docs during the exercise.
 
@@ -13,21 +15,18 @@ Launch a **new** subagent with **codesift MCP** configured (see [mcp.md](../../s
 ## Prerequisite
 
 ```bash
+mise trust
 mise run cli index .
 ```
 
-Cursor MCP config (adjust path):
+MCP launcher: **`mise run mcp`** — see [mcp.md](../../specs/mcp.md).
 
-```json
-{
-  "mcpServers": {
-    "codesift": {
-      "command": "mise",
-      "args": ["run", "cli", "mcp", "--workspace", "/path/to/codesift"]
-    }
-  }
-}
-```
+| Client | Config file |
+|--------|-------------|
+| Cursor | [`.cursor/mcp.json`](../../../.cursor/mcp.json) |
+| OpenCode | [`opencode.json`](../../../opencode.json) (preferred for cross-client baseline) |
+
+Reload MCP in Cursor after first clone.
 
 ## Prompt
 
@@ -54,7 +53,7 @@ Optional third: `get_symbol { "name": "parse_query", "kind": "function" }` for d
 
 | Date | Commit | Runner | MCP tool calls | Wall time | Usages found | Callstack | Notes |
 |------|--------|--------|----------------|-----------|--------------|-----------|-------|
-| | post-mcp | TBD | target ≤3 | | ≥12 | main via depth=2 | |
+| | post-mcp | 05dc01c | generalPurpose | **3** | ~3–5 s | 11 | validate chain (depth 2) | hit ≤3 target |
 
 Compare with [CLI-only DF-001](001-parse-query-usages.md) (~38 CLI invocations pre-MCP).
 

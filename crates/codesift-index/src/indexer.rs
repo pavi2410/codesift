@@ -222,6 +222,7 @@ impl Indexer {
         store.meta.symbol_count = store.all_symbols()?.len() as u64;
         store.save_meta()?;
         store.commit()?;
+        store.write_query_snapshot(&workspace.index_dir)?;
 
         info!(
             files_indexed,

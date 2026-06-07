@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "codesift": {
+      "command": "mise",
+      "args": ["run", "mcp"]
+    }
+  }
+}

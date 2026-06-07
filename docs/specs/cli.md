@@ -175,8 +175,10 @@ codesift status
 Start MCP server on stdio.
 
 ```bash
-codesift mcp [--workspace PATH]
+codesift --workspace PATH mcp
 ```
+
+Global `--workspace` must come **before** the `mcp` subcommand (default: `.`).
 
 See [mcp.md](mcp.md).
 

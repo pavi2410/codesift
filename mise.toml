@@ -17,6 +17,12 @@ run = "./target/release/codesift"
 run_windows = ".\\target\\release\\codesift.exe"
 raw_args = true
 
+[tasks.mcp]
+description = "Start codesift MCP server (stdio) for Cursor, OpenCode, etc."
+depends = ["build-cli"]
+run = "./target/release/codesift --workspace . mcp"
+run_windows = ".\\target\\release\\codesift.exe --workspace . mcp"
+
 [tasks.fmt]
 description = "Format all Rust code"
 run = "cargo fmt --all"

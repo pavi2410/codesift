@@ -30,7 +30,8 @@ Dogfooding measures **tool + agent behavior under constraints**, not whether the
 
 ### Launch checklist (orchestrator)
 
-1. New subagent (e.g. Cursor Task) — do not `resume` a prior exercise agent unless explicitly benchmarking continuation behavior (DF-010).
+1. Ensure MCP is configured: `mise trust` → Cursor reloads [`.cursor/mcp.json`](../.cursor/mcp.json) or OpenCode reads [`opencode.json`](../../opencode.json); index with `mise run cli index .`.
+2. New subagent (e.g. Cursor Task) — do not `resume` a prior exercise agent unless explicitly benchmarking continuation behavior (DF-010). **For MCP exercises:** use Agent mode with MCP tools, not shell-only Task agents.
 2. Subagent prompt = exercise **Prompt** field verbatim + allowed/forbidden tools (e.g. "codesift CLI only; MUST NOT use grep/rg").
 3. Optional context: workspace path, `mise run cli` invocation pattern — **not** expected answers or example sym URLs from a previous session.
 4. Let subagent run to completion; do not mid-run correct misses or paste ground-truth tables.

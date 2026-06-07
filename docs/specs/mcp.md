@@ -17,25 +17,65 @@ Model Context Protocol server for AI agents. Implementation: `rmcp` stdio transp
 ## Startup
 
 ```bash
-codesift mcp --workspace /path/to/repo
+mise run mcp
 ```
 
-Server requires an existing index at `{workspace}/.codesift/`. Run `codesift index` first.
+Equivalent: `mise run cli -- --workspace . mcp` or `codesift --workspace /path/to/repo mcp`.
 
-### Cursor configuration
+Server requires an existing index at `{workspace}/.codesift/`. Run `mise run cli index .` first.
+
+Indexing writes **`query.snap`** — a lock-free read snapshot used by MCP (and queries when present). MCP never opens the fjall database, so reconnects and parallel readers do not hit `FjallError: Locked`.
+
+### Canonical launcher
+
+| Item | Value |
+|------|-------|
+| Command | `mise run mcp` |
+| Task | [`mise.toml`](../../mise.toml) → `[tasks.mcp]` |
+
+All agent clients should spawn **`mise run mcp`** from the repo root (builds release CLI if needed, then stdio MCP).
+
+### Cursor (this repo)
+
+Project config: [`.cursor/mcp.json`](../../.cursor/mcp.json) — committed for team onboarding.
 
 ```json
 {
   "mcpServers": {
     "codesift": {
-      "command": "codesift",
-      "args": ["mcp", "--workspace", "/path/to/repo"]
+      "command": "mise",
+      "args": ["run", "mcp"]
     }
   }
 }
 ```
 
-Use `mise run cli mcp --workspace .` during development if the binary is not on `PATH`.
+Requires [mise](https://mise.jdx.dev/) on `PATH`. Reload MCP in Cursor after first clone (`mise trust` in repo).
+
+Use **Agent mode** (not Ask) so MCP tools appear. Subagents spawned from Agent inherit MCP tools.
+
+### OpenCode
+
+Project config: [`opencode.json`](../../opencode.json) at repo root.
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "codesift": {
+      "type": "local",
+      "command": ["mise", "run", "mcp"],
+      "enabled": true
+    }
+  }
+}
+```
+
+OpenCode merges project `opencode.json` over global config. Prefer OpenCode for **cross-client dogfood** baselines (see [agent-harness-next.md](../future/agent-harness-next.md)).
+
+### Other clients
+
+Same stdio process; only the config envelope differs (VS Code: `.vscode/mcp.json` with `servers` key).
 
 ## Session model
 

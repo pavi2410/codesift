@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use camino::Utf8Path;
 use codesift_core::{Error as CoreError, Result as CoreResult};
 use fjall::{Database, Keyspace, KeyspaceCreateOptions, PersistMode};
@@ -5,6 +7,7 @@ use serde::{Serialize, de::DeserializeOwned};
 
 use crate::meta::IndexMeta;
 use crate::records::{EdgeRecord, FileStateRecord, RefRecord, SymbolRecord};
+use crate::snapshot::{self, SnapshotStore};
 
 pub struct IndexStore {
     pub meta: IndexMeta,
@@ -61,6 +64,36 @@ impl IndexStore {
             file_state,
             edge_counter,
         })
+    }
+
+    pub fn write_query_snapshot(&self, index_dir: &Utf8Path) -> CoreResult<()> {
+        let path = SnapshotStore::snapshot_path(index_dir);
+        snapshot::write_query_snapshot(
+            &self.meta,
+            &dump_keyspace(&self.symbols)?,
+            &dump_keyspace(&self.refs)?,
+            &dump_keyspace(&self.edges)?,
+            &path,
+        )
+    }
+
+    pub fn open_with_retry(index_dir: &Utf8Path, attempts: u32) -> CoreResult<Self> {
+        let mut last_err = None;
+        for attempt in 0..attempts {
+            if attempt > 0 {
+                std::thread::sleep(std::time::Duration::from_millis(200 * u64::from(attempt)));
+            }
+            match Self::open(index_dir) {
+                Ok(store) => return Ok(store),
+                Err(err) if err.to_string().contains("Locked") => {
+                    last_err = Some(err);
+                }
+                Err(err) => return Err(err),
+            }
+        }
+        Err(last_err.unwrap_or_else(|| {
+            CoreError::message("index store locked; stop other codesift processes or re-run index")
+        }))
     }
 
     pub fn save_meta(&mut self) -> CoreResult<()> {
@@ -408,6 +441,17 @@ impl IndexStore {
     }
 }
 
+fn dump_keyspace(keyspace: &Keyspace) -> CoreResult<HashMap<String, Vec<u8>>> {
+    let mut out = HashMap::new();
+    for guard in keyspace.iter() {
+        let (key, value) = guard
+            .into_inner()
+            .map_err(|e| CoreError::message(e.to_string()))?;
+        out.insert(String::from_utf8_lossy(&key).into_owned(), value.to_vec());
+    }
+    Ok(out)
+}
+
 fn open_keyspace(db: &Database, name: &str) -> CoreResult<Keyspace> {
     db.keyspace(name, KeyspaceCreateOptions::default)
         .map_err(|e| CoreError::message(e.to_string()))
@@ -468,7 +512,7 @@ fn get_ref_record(keyspace: &Keyspace, key: &str) -> CoreResult<Option<RefRecord
     get_postcard(keyspace, key.as_bytes())
 }
 
-fn kind_name_key(id: &str) -> Option<String> {
+pub(crate) fn kind_name_key(id: &str) -> Option<String> {
     if id.contains("/unresolved#") {
         return id
             .split("/unresolved#")
@@ -482,7 +526,7 @@ fn kind_name_key(id: &str) -> Option<String> {
         .map(str::to_string)
 }
 
-fn parse_unresolved_id(id: &str) -> Option<(String, String)> {
+pub(crate) fn parse_unresolved_id(id: &str) -> Option<(String, String)> {
     let rest = id.split("/unresolved#").nth(1)?;
     let kind_name = rest.split('@').next()?;
     let (kind, name) = kind_name.split_once(':')?;

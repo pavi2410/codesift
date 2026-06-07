@@ -2,44 +2,63 @@
 
 use camino::Utf8PathBuf;
 use codesift_core::{Error, Result, Workspace};
-use codesift_store::{IndexStore, SymbolRecord};
+use codesift_store::{IndexStore, QueryStore, SnapshotStore, SymbolRecord};
 
 use crate::executor::QueryExecutor;
 use crate::parser::StructuralQuery;
 use crate::response::{QueryHit, StatusResponse};
 use crate::validate::parse_query_with_hints;
 
+enum QueryBackend {
+    Live(IndexStore),
+    Snapshot(SnapshotStore),
+}
+
+impl QueryBackend {
+    fn as_store(&self) -> &dyn QueryStore {
+        match self {
+            Self::Live(store) => store,
+            Self::Snapshot(store) => store,
+        }
+    }
+}
+
 pub struct CodeIntel {
-    store: IndexStore,
+    backend: QueryBackend,
     index_path: Utf8PathBuf,
 }
 
 impl CodeIntel {
+    /// Open for queries. Prefers lock-free `query.snap` when present (MCP-safe).
     pub fn open(workspace: &Workspace) -> Result<Self> {
         if !workspace.index_dir.exists() {
             return Err(Error::message(
                 "index not found; run `codesift index` first",
             ));
         }
-        let store = IndexStore::open(&workspace.index_dir)?;
+
+        let snap_path = SnapshotStore::snapshot_path(&workspace.index_dir);
+        let backend = if snap_path.exists() {
+            QueryBackend::Snapshot(SnapshotStore::load(&snap_path)?)
+        } else {
+            QueryBackend::Live(IndexStore::open_with_retry(&workspace.index_dir, 3)?)
+        };
+
         Ok(Self {
             index_path: workspace.index_dir.clone(),
-            store,
+            backend,
         })
     }
 
-    pub fn store(&self) -> &IndexStore {
-        &self.store
-    }
-
     pub fn index_status(&self) -> StatusResponse {
+        let meta = self.backend.as_store().meta();
         StatusResponse {
-            workspace_rev: self.store.meta.workspace_rev,
-            index_format_version: self.store.meta.index_format_version,
-            files: self.store.meta.file_count,
-            symbols: self.store.meta.symbol_count,
+            workspace_rev: meta.workspace_rev,
+            index_format_version: meta.index_format_version,
+            files: meta.file_count,
+            symbols: meta.symbol_count,
             semantic_ready: false,
-            last_indexed: self.store.meta.updated_at.to_rfc3339(),
+            last_indexed: meta.updated_at.to_rfc3339(),
             index_path: self.index_path.to_string(),
         }
     }
@@ -51,13 +70,11 @@ impl CodeIntel {
         kind: Option<&str>,
         path_prefix: Option<&str>,
     ) -> Result<Vec<SymbolRecord>> {
+        let store = self.backend.as_store();
         let mut symbols = if let Some(id) = symbol_id {
-            self.store
-                .get_symbol(id)?
-                .into_iter()
-                .collect::<Vec<_>>()
+            store.get_symbol(id)?.into_iter().collect::<Vec<_>>()
         } else if let Some(name) = name {
-            QueryExecutor::new(&self.store).lookup_by_name(name, path_prefix)?
+            QueryExecutor::new(store).lookup_by_name(name, path_prefix)?
         } else {
             return Err(Error::message("provide name or symbol_id"));
         };
@@ -69,12 +86,14 @@ impl CodeIntel {
     }
 
     pub fn find_references_by_name(&self, name: &str) -> Result<Vec<QueryHit>> {
-        QueryExecutor::new(&self.store).refs_by_name(name)
+        QueryExecutor::new(self.backend.as_store()).refs_by_name(name)
     }
 
     pub fn find_references_to_id(&self, symbol_id: &str) -> Result<Vec<QueryHit>> {
         let query = parse_query_with_hints(&format!("refs:to={symbol_id}"))?;
-        Ok(QueryExecutor::new(&self.store).execute(&query)?.hits)
+        Ok(QueryExecutor::new(self.backend.as_store())
+            .execute(&query)?
+            .hits)
     }
 
     pub fn find_references(
@@ -87,10 +106,11 @@ impl CodeIntel {
             return self.find_references_to_id(id);
         }
         let name = name.ok_or_else(|| Error::message("provide name or symbol_id"))?;
+        let store = self.backend.as_store();
         let mut hits = self.find_references_by_name(name)?;
         if let Some(kind) = kind {
             hits.retain(|h| {
-                self.store
+                store
                     .get_symbol(&h.symbol.id)
                     .ok()
                     .flatten()
@@ -118,10 +138,12 @@ impl CodeIntel {
                 .ok_or_else(|| Error::message(format!("symbol not found: {name}")))?
         };
         let query = parse_query_with_hints(&format!("callers:of={target} depth={depth}"))?;
-        Ok(QueryExecutor::new(&self.store).execute(&query)?.hits)
+        Ok(QueryExecutor::new(self.backend.as_store())
+            .execute(&query)?
+            .hits)
     }
 
     pub fn execute_query(&self, query: &StructuralQuery) -> Result<crate::response::QueryResponse> {
-        QueryExecutor::new(&self.store).execute(query)
+        QueryExecutor::new(self.backend.as_store()).execute(query)
     }
 }

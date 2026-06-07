@@ -2,17 +2,17 @@ use std::collections::{HashSet, VecDeque};
 use std::time::Instant;
 
 use codesift_core::Result;
-use codesift_store::{IndexStore, RefKind, SymbolRecord};
+use codesift_store::{QueryStore, RefKind, SymbolRecord};
 
 use crate::parser::StructuralQuery;
 use crate::response::{QueryError, QueryHit, QueryResponse};
 
-pub struct QueryExecutor<'a> {
-    store: &'a IndexStore,
+pub struct QueryExecutor<'a, S: QueryStore + ?Sized> {
+    store: &'a S,
 }
 
-impl<'a> QueryExecutor<'a> {
-    pub fn new(store: &'a IndexStore) -> Self {
+impl<'a, S: QueryStore + ?Sized> QueryExecutor<'a, S> {
+    pub fn new(store: &'a S) -> Self {
         Self { store }
     }
 
@@ -38,7 +38,7 @@ impl<'a> QueryExecutor<'a> {
         let total = hits.len();
         Ok(QueryResponse {
             query: query.raw.clone(),
-            workspace_rev: self.store.meta.workspace_rev,
+            workspace_rev: self.store.meta().workspace_rev,
             took_ms: started.elapsed().as_millis() as u64,
             hits,
             total,
@@ -112,7 +112,7 @@ impl<'a> QueryExecutor<'a> {
         let total = hits.len();
         Ok(QueryResponse {
             query: query.raw.clone(),
-            workspace_rev: self.store.meta.workspace_rev,
+            workspace_rev: self.store.meta().workspace_rev,
             took_ms: started.elapsed().as_millis() as u64,
             hits,
             total,
@@ -165,7 +165,7 @@ impl<'a> QueryExecutor<'a> {
         let total = hits.len();
         Ok(QueryResponse {
             query: query.raw.clone(),
-            workspace_rev: self.store.meta.workspace_rev,
+            workspace_rev: self.store.meta().workspace_rev,
             took_ms: started.elapsed().as_millis() as u64,
             hits,
             total,

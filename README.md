@@ -16,10 +16,10 @@ mise trust
 mise run fix    # cargo fmt + clippy --fix
 mise run check  # CI-equivalent
 mise run cli index .
-mise run cli mcp --workspace .
+mise run mcp          # MCP stdio server (Cursor / OpenCode)
 ```
 
-**Agents → MCP** (`find_references`, `get_callers`, …). **Humans/CI → CLI** (`index`, `status`, `export`, debug `refs --name`).
+**Agents → MCP** (`find_references`, `get_callers`, …). Config: [`.cursor/mcp.json`](.cursor/mcp.json), [`opencode.json`](opencode.json) — both use `mise run mcp`. **Humans/CI → CLI** (`index`, `status`, `export`).
 
 ## Dogfooding
 
@@ -37,7 +37,7 @@ Agent exercises with ground truth and baselines: [docs/dogfooding/](docs/dogfood
 
 ```bash
 # Agents — MCP (primary)
-codesift mcp --workspace .
+codesift --workspace . mcp
 
 # Humans / CI — CLI ops and debug
 codesift index .
