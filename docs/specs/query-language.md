@@ -1,8 +1,10 @@
 # Query Language
 
-**Status:** draft
+**Status:** accepted
 
 Structural query DSL, semantic search, and hybrid retrieval. See [chunking-and-semantic.md](chunking-and-semantic.md) for embedding pipeline.
+
+**MVP scope:** Structural filters only — `symbol:name=`, `kind=`, `path=`, `refs:to=`, `callers:of=`. AND semantics only. Semantic/hybrid search deferred.
 
 ## Query modes
 

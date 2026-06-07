@@ -47,13 +47,14 @@ Do not change accepted ADRs in place — supersede them with a new ADR.
 
 ## Code contributions (future)
 
-Once the Rust workspace lands:
+Once the Rust workspace lands, use [mise](https://mise.jdx.dev/) (see [mise.toml](../mise.toml)):
 
 ```bash
-cargo build
-cargo test
-cargo fmt --check
-cargo clippy -- -D warnings
+mise trust
+mise run fmt          # cargo fmt --all
+mise run lint         # clippy -D warnings
+mise run fix          # fmt + clippy --fix
+mise run check        # fmt --check + clippy + test
 ```
 
 CI will enforce these checks. See [docs/architecture/future-crate-layout.md](docs/architecture/future-crate-layout.md) for the planned crate structure.

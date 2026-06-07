@@ -1,0 +1,36 @@
+[tools]
+rust = "latest"
+
+[env]
+RUST_BACKTRACE = "1"
+
+[tasks.fmt]
+description = "Format all Rust code"
+run = "cargo fmt --all"
+
+[tasks.lint]
+description = "Run clippy with warnings denied"
+run = "cargo clippy --workspace --all-targets -- -D warnings"
+
+[tasks.fix]
+description = "Format and apply clippy fixes"
+run = [
+  "cargo fmt --all",
+  "cargo clippy --workspace --all-targets --fix --allow-dirty --allow-staged -- -D warnings",
+]
+
+[tasks.build]
+description = "Build workspace"
+run = "cargo build --workspace"
+
+[tasks.test]
+description = "Run tests"
+run = "cargo test --workspace"
+
+[tasks.check]
+description = "Fmt check, clippy, test"
+run = [
+  "cargo fmt --all -- --check",
+  "cargo clippy --workspace --all-targets -- -D warnings",
+  "cargo test --workspace",
+]

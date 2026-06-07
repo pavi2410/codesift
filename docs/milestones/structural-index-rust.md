@@ -1,7 +1,7 @@
 # Structural Index (Rust)
 
 **Capability:** `structural-index-rust`, `cli-structural`  
-**Status:** spec-draft
+**Status:** verified
 
 Rust workspace structural indexing with CLI. Independent of semantic search and MCP — those are separate capabilities in [capabilities.md](../capabilities.md).
 

@@ -1,8 +1,10 @@
 # Symbol Model
 
-**Status:** draft
+**Status:** accepted
 
 Defines symbols, stable IDs, locations, and relations. See ADR-0004 for storage.
+
+**MVP scope:** Rust symbol kinds only; `doc_section` and `parameter` deferred; full name resolution deferred.
 
 ## Symbol kinds
 

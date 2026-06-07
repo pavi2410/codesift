@@ -1,8 +1,10 @@
 # VFS and Workspace
 
-**Status:** draft
+**Status:** accepted
 
 Virtual file system, workspace roots, and file identity.
+
+**MVP scope:** Single root, `.rs` files only, hash-based skip. File watcher and git integration deferred.
 
 ## Workspace
 

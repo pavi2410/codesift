@@ -10,9 +10,9 @@ desktop.ini
 *.swo
 *~
 
-# Rust (future)
+# Rust
 /target/
-Cargo.lock
+# Cargo.lock is committed for the application binary
 
 # codesift index (local dev, future)
 .codesift/

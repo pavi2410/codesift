@@ -1,0 +1,21 @@
+[package]
+name = "codesift-query"
+description = "Query parsing and execution for codesift"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+codesift-core.workspace = true
+codesift-store.workspace = true
+globset.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+camino.workspace = true
+codesift-store.workspace = true
+tempfile.workspace = true

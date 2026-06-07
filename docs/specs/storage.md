@@ -1,8 +1,10 @@
 # Storage
 
-**Status:** draft
+**Status:** accepted
 
 On-disk layout and backend configuration. ADR-0004, ADR-0006, ADR-0008.
+
+**MVP scope:** `meta.json` + fjall `kv/` only. `vectors/`, `text/`, `embeddings/`, `snapshots/` deferred.
 
 ## Directory layout
 

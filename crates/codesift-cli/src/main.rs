@@ -1,0 +1,300 @@
+use std::io::{self, IsTerminal, Write};
+
+use clap::{Parser, Subcommand, ValueEnum};
+use codesift_core::{Error, Result, Workspace};
+use codesift_index::{IndexOptions, Indexer};
+use codesift_query::{QueryExecutor, StatusResponse, invalid_query, parse_query};
+use codesift_store::IndexStore;
+use tracing_subscriber::EnvFilter;
+
+#[derive(Debug, Clone, Copy, ValueEnum)]
+enum OutputFormat {
+    Json,
+    Table,
+    Plain,
+}
+
+#[derive(Parser)]
+#[command(
+    name = "codesift",
+    about = "IntelliJ-grade code intelligence for agents"
+)]
+struct Cli {
+    #[arg(long, default_value = ".")]
+    workspace: camino::Utf8PathBuf,
+
+    #[arg(long)]
+    index_path: Option<camino::Utf8PathBuf>,
+
+    #[arg(short, long, action = clap::ArgAction::Count)]
+    verbose: u8,
+
+    #[arg(short, long)]
+    quiet: bool,
+
+    #[arg(long, value_enum)]
+    format: Option<OutputFormat>,
+
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    Index {
+        path: Option<camino::Utf8PathBuf>,
+        #[arg(long)]
+        force: bool,
+        #[arg(short = 'j', long)]
+        jobs: Option<usize>,
+    },
+    Query {
+        query: String,
+    },
+    Symbol {
+        id: Option<String>,
+        #[arg(long)]
+        name: Option<String>,
+        #[arg(long)]
+        path: Option<String>,
+    },
+    Refs {
+        id: Option<String>,
+        #[arg(long)]
+        name: Option<String>,
+    },
+    Status,
+    Export {
+        #[arg(long, default_value = "jsonl")]
+        format: String,
+        #[arg(long)]
+        output: Option<camino::Utf8PathBuf>,
+    },
+}
+
+fn main() {
+    if let Err(err) = run() {
+        eprintln!("error: {err}");
+        std::process::exit(2);
+    }
+}
+
+fn run() -> Result<()> {
+    let cli = Cli::parse();
+    init_logging(cli.verbose, cli.quiet);
+
+    let mut workspace = Workspace::discover(&cli.workspace)?;
+    if let Some(index_path) = cli.index_path.or_else(index_path_from_env) {
+        workspace = workspace.with_index_dir(index_path);
+    }
+
+    let format = cli.format.unwrap_or_else(default_format);
+
+    match cli.command {
+        Commands::Index { path, force, jobs } => {
+            if let Some(path) = path {
+                workspace = Workspace::discover(path)?;
+            }
+            let report = Indexer::index(
+                &workspace,
+                &IndexOptions {
+                    force,
+                    jobs: jobs.unwrap_or_else(|| IndexOptions::default().jobs),
+                },
+            )?;
+            print_json(&report, format)?;
+        }
+        Commands::Query { query } => {
+            let store = open_store(&workspace)?;
+            let response = match parse_query(&query) {
+                Ok(parsed) => QueryExecutor::new(&store).execute(&parsed)?,
+                Err(err) => invalid_query(&query, err.to_string()),
+            };
+            print_query(&response, format)?;
+        }
+        Commands::Symbol { id, name, path } => {
+            let store = open_store(&workspace)?;
+            let executor = QueryExecutor::new(&store);
+            let symbols = if let Some(id) = id {
+                executor.lookup_symbol(&id)?.into_iter().collect()
+            } else if let Some(name) = name {
+                executor.lookup_by_name(&name, path.as_deref())?
+            } else {
+                return Err(Error::message("provide symbol id or --name"));
+            };
+            print_symbols(&symbols, format)?;
+        }
+        Commands::Refs { id, name } => {
+            let store = open_store(&workspace)?;
+            let target = if let Some(id) = id {
+                id
+            } else if let Some(name) = name {
+                let symbols = QueryExecutor::new(&store).lookup_by_name(&name, None)?;
+                symbols
+                    .first()
+                    .map(|s| s.id.clone())
+                    .ok_or_else(|| Error::message(format!("symbol not found: {name}")))?
+            } else {
+                return Err(Error::message("provide symbol id or --name"));
+            };
+            let query = format!("refs:to={target}");
+            let parsed = parse_query(&query)?;
+            let response = QueryExecutor::new(&store).execute(&parsed)?;
+            print_query(&response, format)?;
+        }
+        Commands::Status => {
+            let store = open_store(&workspace)?;
+            let status = StatusResponse {
+                workspace_rev: store.meta.workspace_rev,
+                index_format_version: store.meta.index_format_version,
+                files: store.meta.file_count,
+                symbols: store.meta.symbol_count,
+                semantic_ready: false,
+                last_indexed: store.meta.updated_at.to_rfc3339(),
+                index_path: workspace.index_dir.to_string(),
+            };
+            print_json(&status, format)?;
+        }
+        Commands::Export { format, output } => {
+            if format != "jsonl" {
+                return Err(Error::message("only --format jsonl is supported in MVP"));
+            }
+            let store = open_store(&workspace)?;
+            export_jsonl(&store, output.as_deref())?;
+        }
+    }
+
+    Ok(())
+}
+
+fn index_path_from_env() -> Option<camino::Utf8PathBuf> {
+    std::env::var("CODESIFT_INDEX_PATH")
+        .ok()
+        .map(camino::Utf8PathBuf::from)
+}
+
+fn open_store(workspace: &Workspace) -> Result<IndexStore> {
+    if !workspace.index_dir.exists() {
+        return Err(Error::message(
+            "index not found; run `codesift index` first",
+        ));
+    }
+    IndexStore::open(&workspace.index_dir)
+}
+
+fn default_format() -> OutputFormat {
+    if io::stdout().is_terminal() {
+        OutputFormat::Table
+    } else {
+        OutputFormat::Json
+    }
+}
+
+fn init_logging(verbose: u8, quiet: bool) {
+    if quiet {
+        return;
+    }
+    let level = match verbose {
+        0 => "warn",
+        1 => "info",
+        _ => "debug",
+    };
+    let _ = tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(level)),
+        )
+        .try_init();
+}
+
+fn print_json<T: serde::Serialize + ?Sized>(value: &T, format: OutputFormat) -> Result<()> {
+    match format {
+        OutputFormat::Json | OutputFormat::Plain => {
+            println!(
+                "{}",
+                serde_json::to_string_pretty(value).map_err(|e| Error::message(e.to_string()))?
+            );
+        }
+        OutputFormat::Table => {
+            println!(
+                "{}",
+                serde_json::to_string_pretty(value).map_err(|e| Error::message(e.to_string()))?
+            );
+        }
+    }
+    Ok(())
+}
+
+fn print_query(response: &codesift_query::QueryResponse, format: OutputFormat) -> Result<()> {
+    match format {
+        OutputFormat::Json | OutputFormat::Plain => print_json(response, format)?,
+        OutputFormat::Table => {
+            if let Some(err) = &response.error {
+                println!("error {}: {}", err.code, err.message);
+            } else if response.hits.is_empty() {
+                println!("no results");
+            } else {
+                for hit in &response.hits {
+                    println!(
+                        "{} {} {}:{}-{}",
+                        hit.symbol.kind.as_str(),
+                        hit.symbol.name,
+                        hit.symbol.path,
+                        hit.symbol.location.start_line,
+                        hit.symbol.location.end_line
+                    );
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn print_symbols(symbols: &[codesift_store::SymbolRecord], format: OutputFormat) -> Result<()> {
+    match format {
+        OutputFormat::Json | OutputFormat::Plain => {
+            print_json(symbols, format)?;
+        }
+        OutputFormat::Table => {
+            for sym in symbols {
+                println!(
+                    "{} {} {}:{}-{}",
+                    sym.kind.as_str(),
+                    sym.name,
+                    sym.path,
+                    sym.location.start_line,
+                    sym.location.end_line
+                );
+            }
+        }
+    }
+    Ok(())
+}
+
+fn export_jsonl(store: &IndexStore, output: Option<&camino::Utf8Path>) -> Result<()> {
+    let mut writer: Box<dyn Write> = if let Some(path) = output {
+        Box::new(std::fs::File::create(path).map_err(|source| Error::Io {
+            path: path.to_string(),
+            source,
+        })?)
+    } else {
+        Box::new(io::stdout())
+    };
+
+    for symbol in store.all_symbols()? {
+        let line = serde_json::json!({"type":"symbol","data":symbol});
+        writeln!(writer, "{}", line).map_err(|source| Error::Io {
+            path: "stdout".to_string(),
+            source,
+        })?;
+    }
+
+    for reference in store.all_refs()? {
+        let line = serde_json::json!({"type":"ref","data":reference});
+        writeln!(writer, "{}", line).map_err(|source| Error::Io {
+            path: "stdout".to_string(),
+            source,
+        })?;
+    }
+
+    Ok(())
+}

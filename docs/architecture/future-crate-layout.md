@@ -111,7 +111,7 @@ flowchart BT
 
 ```toml
 [workspace]
-resolver = "2"
+resolver = "3"
 members = ["crates/*"]
 
 [workspace.package]

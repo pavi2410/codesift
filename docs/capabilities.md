@@ -42,18 +42,18 @@ lockfile-resolution ───► purl-library-docs
 
 | ID | Capability | Spec / doc | Prerequisite | Status |
 |----|------------|------------|--------------|--------|
-| `structural-index-rust` | Rust symbols, refs, callers; persistent `.codesift/` | [symbol-model](specs/symbol-model.md) | — | spec-draft |
+| `structural-index-rust` | Rust symbols, refs, callers; persistent `.codesift/` | [symbol-model](specs/symbol-model.md) | — | verified |
 | `structural-depth` | Import graph, impl/trait edges, workspace cross-crate | [structural-depth](milestones/structural-depth.md) | `structural-index-rust` | spec-draft |
 | `semantic-search` | Chunking, embeddings, hybrid BM25+vector | [chunking-and-semantic](specs/chunking-and-semantic.md) | `structural-index-rust` | spec-draft |
 | `incremental-watch` | File watcher, invalidation graph, sub-second updates | [incremental-indexing](specs/incremental-indexing.md) | `structural-index-rust` | spec-draft |
 | `multi-language` | tree-sitter PSI for TS, Python, Go | [multi-language-strategy](techniques/multi-language-strategy.md) | `structural-index-rust` | spec-draft |
-| `vfs-workspace` | gitignore walk, hashing, workspace roots | [vfs-and-workspace](specs/vfs-and-workspace.md) | — | spec-draft |
+| `vfs-workspace` | gitignore walk, hashing, workspace roots | [vfs-and-workspace](specs/vfs-and-workspace.md) | — | verified |
 
 ### Interfaces
 
 | ID | Capability | Spec / doc | Prerequisite | Status |
 |----|------------|------------|--------------|--------|
-| `cli-structural` | `index`, `query`, `symbol`, `refs`, `status`, `export` | [cli](specs/cli.md) | `structural-index-rust` | spec-draft |
+| `cli-structural` | `index`, `query`, `symbol`, `refs`, `status`, `export` | [cli](specs/cli.md) | `structural-index-rust` | verified |
 | `cli-search` | `search` hybrid command | [cli](specs/cli.md) | `semantic-search` | spec-draft |
 | `mcp-core-tools` | `index_status`, `query_structural`, `get_symbol`, `find_references`, `get_callers` | [mcp](specs/mcp.md) | `structural-index-rust` | spec-draft |
 | `mcp-semantic-tools` | `search_semantic`, `read_chunk` | [mcp](specs/mcp.md) | `semantic-search` | spec-draft |
@@ -98,7 +98,7 @@ Named bundle for “first useful for agents” — **not** a mandatory build seq
 
 ## Current focus (optional)
 
-> **Documentation** capability is largely complete. **Next implementation focus:** `structural-index-rust` + `cli-structural` — unless you choose to parallelize `semantic-search` / `mcp-server` once prerequisites are met.
+> **Implementation focus:** `structural-index-rust` + `cli-structural` verified on the codesift workspace (2026-06-07). Next: `incremental-watch`, then `mcp-core-tools`.
 
 Update this blurb as work shifts; it does **not** block other capabilities.
 

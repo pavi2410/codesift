@@ -1,8 +1,10 @@
 # Index Schema
 
-**Status:** draft
+**Status:** accepted
 
 Logical schema for index records stored in fjall, usearch, and tantivy. Serialization: [postcard](../adr/0008-postcard-serialization.md) for KV records; JSON for export.
+
+**MVP scope:** `symbols`, `refs`, `edges`, `file_state` keyspaces only. `chunks`, `embedding_cache`, usearch, and tantivy deferred.
 
 ## Versioning
 

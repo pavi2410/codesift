@@ -2,10 +2,20 @@
 
 **IntelliJ-grade code intelligence for agents** — persistent structural + semantic indexing, exposed via CLI and MCP.
 
-[![Status](https://img.shields.io/badge/status-design%20phase-blue)](docs/capabilities.md)
+[![Status](https://img.shields.io/badge/status-structural%20MVP-green)](docs/capabilities.md)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
-Rust-based indexing engine for AI agents and CI. Design phase: specs and ADRs before implementation.
+Rust-based indexing engine for AI agents and CI. Structural index + CLI MVP implemented; semantic search and MCP next.
+
+## Development
+
+Uses [mise](https://mise.jdx.dev/) for the Rust toolchain (see [mise.toml](mise.toml)):
+
+```bash
+mise trust
+mise run fix    # cargo fmt + clippy --fix
+mise run check  # CI-equivalent
+```
 
 ## Quick links
 

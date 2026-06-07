@@ -1,0 +1,25 @@
+[package]
+name = "codesift-cli"
+description = "CLI for codesift"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "codesift"
+path = "src/main.rs"
+
+[dependencies]
+camino.workspace = true
+clap.workspace = true
+codesift-core.workspace = true
+codesift-index.workspace = true
+codesift-query.workspace = true
+codesift-store.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

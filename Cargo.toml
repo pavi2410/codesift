@@ -1,0 +1,36 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+authors = ["codesift contributors"]
+rust-version = "1.91"
+
+[workspace.dependencies]
+blake3 = "1"
+camino = "1"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4", features = ["derive"] }
+codesift-core = { path = "crates/codesift-core" }
+codesift-index = { path = "crates/codesift-index" }
+codesift-parse = { path = "crates/codesift-parse" }
+codesift-query = { path = "crates/codesift-query" }
+codesift-store = { path = "crates/codesift-store" }
+fjall = "3.1"
+globset = "0.4"
+ignore = "0.4"
+postcard = { version = "1", features = ["alloc"] }
+ra_ap_syntax = "0.0.321"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

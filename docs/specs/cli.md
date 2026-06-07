@@ -1,8 +1,10 @@
 # CLI Specification
 
-**Status:** draft
+**Status:** accepted
 
 Command-line interface for codesift. Implementation: `clap` (ADR-0005).
+
+**MVP scope:** `index`, `query`, `symbol`, `refs`, `status`, `export` only. `watch`, `search`, `mcp` deferred.
 
 ## Binary name
 
