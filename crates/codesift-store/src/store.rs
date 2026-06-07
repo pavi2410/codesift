@@ -123,21 +123,109 @@ impl IndexStore {
     }
 
     pub fn put_ref(&self, record: &RefRecord) -> CoreResult<()> {
-        let key = format!("ref:{}:{}", record.from_id, record.to_id);
-        put_postcard(&self.refs, key.as_bytes(), record)
+        let key = format!(
+            "ref:{}:{}:{}",
+            record.from_id, record.to_id, record.site.start_byte
+        );
+        put_postcard(&self.refs, key.as_bytes(), record)?;
+        append_index(
+            &self.refs,
+            format!("rev:refs:{}", record.to_id),
+            &key,
+        )?;
+        if let Some(kind_name) = kind_name_key(&record.to_id) {
+            append_index(
+                &self.refs,
+                format!("rev:refs:byname:{kind_name}"),
+                &key,
+            )?;
+        }
+        Ok(())
     }
 
     pub fn refs_to(&self, to_id: &str) -> CoreResult<Vec<RefRecord>> {
         let mut out = Vec::new();
-        for guard in self.refs.iter() {
-            let (key, value) = guard
-                .into_inner()
-                .map_err(|e| CoreError::message(e.to_string()))?;
-            let key = String::from_utf8_lossy(&key);
-            if key.starts_with("ref:") && key.ends_with(to_id) {
-                let record: RefRecord =
-                    postcard::from_bytes(&value).map_err(|e| CoreError::message(e.to_string()))?;
-                out.push(record);
+        let mut seen = std::collections::HashSet::new();
+
+        if let Some(kind_name) = kind_name_key(to_id) {
+            let index_key = format!("rev:refs:byname:{kind_name}");
+            let ref_keys: Vec<String> =
+                get_postcard(&self.refs, index_key.as_bytes())?.unwrap_or_default();
+            for ref_key in ref_keys {
+                if !seen.insert(ref_key.clone()) {
+                    continue;
+                }
+                if let Some(record) = get_postcard(&self.refs, ref_key.as_bytes())? {
+                    out.push(record);
+                }
+            }
+        }
+
+        for target in self.ref_target_ids(to_id)? {
+            let index_key = format!("rev:refs:{target}");
+            let ref_keys: Vec<String> =
+                get_postcard(&self.refs, index_key.as_bytes())?.unwrap_or_default();
+            for ref_key in ref_keys {
+                if !seen.insert(ref_key.clone()) {
+                    continue;
+                }
+                if let Some(record) = get_postcard(&self.refs, ref_key.as_bytes())? {
+                    out.push(record);
+                }
+            }
+        }
+        Ok(out)
+    }
+
+    /// Canonical symbol ID plus matching unresolved placeholder IDs for the same kind+name.
+    pub fn ref_target_ids(&self, to_id: &str) -> CoreResult<Vec<String>> {
+        let mut ids = vec![to_id.to_string()];
+        if let Some(sym) = self.get_symbol(to_id)? {
+            let unresolved = make_unresolved_id(sym.workspace_rev, sym.kind, &sym.name);
+            if unresolved != to_id {
+                ids.push(unresolved);
+            }
+            for other in self.lookup_by_name(&sym.name)? {
+                if other.kind == sym.kind && other.id != to_id {
+                    ids.push(other.id.clone());
+                }
+            }
+        } else if to_id.contains("/unresolved#")
+            && let Some((kind, name)) = parse_unresolved_id(to_id)
+        {
+            for sym in self.lookup_by_name(&name)? {
+                if sym.kind.as_str() == kind {
+                    ids.push(sym.id.clone());
+                }
+            }
+        }
+        ids.sort();
+        ids.dedup();
+        Ok(ids)
+    }
+
+    pub fn refs_to_name(&self, name: &str) -> CoreResult<Vec<RefRecord>> {
+        let mut out = Vec::new();
+        let mut seen = std::collections::HashSet::new();
+        for sym in self.lookup_by_name(name)? {
+            for reference in self.refs_to(&sym.id)? {
+                let key = format!(
+                    "{}:{}:{}",
+                    reference.from_id, reference.to_id, reference.site.start_byte
+                );
+                if seen.insert(key) {
+                    out.push(reference);
+                }
+            }
+        }
+        let unresolved = make_unresolved_id(self.meta.workspace_rev, codesift_core::SymbolKind::Function, name);
+        for reference in self.refs_to(&unresolved)? {
+            let key = format!(
+                "{}:{}:{}",
+                reference.from_id, reference.to_id, reference.site.start_byte
+            );
+            if seen.insert(key) {
+                out.push(reference);
             }
         }
         Ok(out)
@@ -150,7 +238,17 @@ impl IndexStore {
             &self.edges,
             format!("rev:{}:{}", edge.relation.as_str(), edge.to_id),
             &edge.id,
-        )
+        )?;
+        if edge.relation == crate::records::Relation::Calls
+            && let Some(kind_name) = kind_name_key(&edge.to_id)
+        {
+            append_index(
+                &self.edges,
+                format!("rev:calls:byname:{kind_name}"),
+                &edge.id,
+            )?;
+        }
+        Ok(())
     }
 
     pub fn next_edge_id(
@@ -163,16 +261,66 @@ impl IndexStore {
     }
 
     pub fn callers_of(&self, to_id: &str) -> CoreResult<Vec<EdgeRecord>> {
-        let key = format!("rev:calls:{to_id}");
-        let ids: Vec<String> = get_postcard(&self.edges, key.as_bytes())?.unwrap_or_default();
         let mut out = Vec::new();
-        for id in ids {
-            let edge_key = format!("edge:calls:{id}");
-            if let Some(edge) = get_postcard(&self.edges, edge_key.as_bytes())? {
-                out.push(edge);
+        let mut seen = std::collections::HashSet::new();
+
+        if let Some(kind_name) = kind_name_key(to_id) {
+            let index_key = format!("rev:calls:byname:{kind_name}");
+            let ids: Vec<String> = get_postcard(&self.edges, index_key.as_bytes())?.unwrap_or_default();
+            for id in ids {
+                if !seen.insert(id.clone()) {
+                    continue;
+                }
+                let edge_key = format!("edge:calls:{id}");
+                if let Some(edge) = get_postcard(&self.edges, edge_key.as_bytes())? {
+                    out.push(edge);
+                }
+            }
+        }
+
+        for target in self.ref_target_ids(to_id)? {
+            let key = format!("rev:calls:{target}");
+            let ids: Vec<String> = get_postcard(&self.edges, key.as_bytes())?.unwrap_or_default();
+            for id in ids {
+                if !seen.insert(id.clone()) {
+                    continue;
+                }
+                let edge_key = format!("edge:calls:{id}");
+                if let Some(edge) = get_postcard(&self.edges, edge_key.as_bytes())? {
+                    out.push(edge);
+                }
             }
         }
         Ok(out)
+    }
+
+    /// Drop ref/edge records and secondary indexes (used on `--force` rebuild).
+    pub fn clear_graph(&mut self) -> CoreResult<()> {
+        let ref_keys: Vec<Vec<u8>> = self
+            .refs
+            .iter()
+            .filter_map(|guard| guard.into_inner().ok())
+            .map(|(key, _)| key.to_vec())
+            .collect();
+        for key in ref_keys {
+            self.refs
+                .remove(&key)
+                .map_err(|e| CoreError::message(e.to_string()))?;
+        }
+
+        let edge_keys: Vec<Vec<u8>> = self
+            .edges
+            .iter()
+            .filter_map(|guard| guard.into_inner().ok())
+            .map(|(key, _)| key.to_vec())
+            .collect();
+        for key in edge_keys {
+            self.edges
+                .remove(&key)
+                .map_err(|e| CoreError::message(e.to_string()))?;
+        }
+        self.edge_counter = 0;
+        Ok(())
     }
 
     pub fn put_file_state(&self, state: &FileStateRecord) -> CoreResult<()> {
@@ -222,10 +370,31 @@ impl IndexStore {
     pub fn all_refs(&self) -> CoreResult<Vec<RefRecord>> {
         let mut out = Vec::new();
         for guard in self.refs.iter() {
-            let (_key, value) = guard
+            let (key, value) = guard
                 .into_inner()
                 .map_err(|e| CoreError::message(e.to_string()))?;
+            let key = String::from_utf8_lossy(&key);
+            if !key.starts_with("ref:") {
+                continue;
+            }
             let record: RefRecord =
+                postcard::from_bytes(&value).map_err(|e| CoreError::message(e.to_string()))?;
+            out.push(record);
+        }
+        Ok(out)
+    }
+
+    pub fn all_edges(&self) -> CoreResult<Vec<EdgeRecord>> {
+        let mut out = Vec::new();
+        for guard in self.edges.iter() {
+            let (key, value) = guard
+                .into_inner()
+                .map_err(|e| CoreError::message(e.to_string()))?;
+            let key = String::from_utf8_lossy(&key);
+            if !key.starts_with("edge:") {
+                continue;
+            }
+            let record: EdgeRecord =
                 postcard::from_bytes(&value).map_err(|e| CoreError::message(e.to_string()))?;
             out.push(record);
         }
@@ -273,6 +442,38 @@ fn append_index(keyspace: &Keyspace, key: String, id: &str) -> CoreResult<()> {
         ids.push(id.to_string());
     }
     put_postcard(keyspace, key.as_bytes(), &ids)
+}
+
+pub fn make_unresolved_id(
+    workspace_rev: u64,
+    kind: codesift_core::SymbolKind,
+    name: &str,
+) -> String {
+    format!(
+        "sym://{workspace_rev}/unresolved#{kind}:{name}@0:0",
+        kind = kind.as_str()
+    )
+}
+
+fn kind_name_key(id: &str) -> Option<String> {
+    if id.contains("/unresolved#") {
+        return id
+            .split("/unresolved#")
+            .nth(1)
+            .and_then(|rest| rest.split('@').next())
+            .map(str::to_string);
+    }
+    id.split('#')
+        .nth(1)
+        .and_then(|rest| rest.split('@').next())
+        .map(str::to_string)
+}
+
+fn parse_unresolved_id(id: &str) -> Option<(String, String)> {
+    let rest = id.split("/unresolved#").nth(1)?;
+    let kind_name = rest.split('@').next()?;
+    let (kind, name) = kind_name.split_once(':')?;
+    Some((kind.to_string(), name.to_string()))
 }
 
 #[cfg(test)]

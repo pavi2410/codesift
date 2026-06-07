@@ -33,9 +33,16 @@ Rust workspace structural indexing with CLI. Independent of semantic search and 
 |-------|----------|
 | `symbol:name=` | yes |
 | `kind=` | yes |
-| `path=` | yes |
-| `refs:to=` | yes |
-| `callers:of=` | yes |
+| `path=` | yes (glob when `*` or `?`) |
+| `refs:to=` | yes (per-edge call sites) |
+| `callers:of=` | yes (per-edge, `depth=` supported) |
+| `depth=` | yes (caller graph BFS) |
+
+Query filter syntax: [ADR 0009](../adr/0009-query-filter-syntax.md). Examples use `{filter_key}={value}` (first `=` only).
+
+## Dogfooding acceptance
+
+Exercises [DF-001](../dogfooding/exercises/001-parse-query-usages.md)–[DF-003](../dogfooding/exercises/003-symbol-by-kind-path.md) encode acceptance scenarios. CI: `cargo test -p codesift-index --test dogfood_exercises`.
 
 ## Acceptance criteria
 
@@ -49,7 +56,7 @@ Rust workspace structural indexing with CLI. Independent of semantic search and 
 
 ## Test corpus
 
-- codesift repo itself (once code exists)
+- codesift repo — [dogfooding exercises](../dogfooding/README.md)
 - Public Rust crate: `ripgrep` or `tokio` subset (TBD)
 
 ## Success metrics (informal)

@@ -80,6 +80,7 @@ lockfile-resolution ───► purl-library-docs
 |----|------------|------------|--------------|--------|
 | `purl-library-docs` | Local PURL-addressed dependency doc index | [purl-library-docs](future/purl-library-docs.md) | `semantic-search`, lockfile resolution | exploring |
 | `documentation` | Product docs, specs, ADRs, architecture | [product/](product/), [README](README.md) | — | spec-draft |
+| `dogfood-benchmark` | Automated agent exercise runner vs rg/grep | [dogfooding/automation](dogfooding/automation.md) | `cli-structural` | exploring |
 
 ## Minimum agent-usable coverage
 
@@ -98,7 +99,7 @@ Named bundle for “first useful for agents” — **not** a mandatory build seq
 
 ## Current focus (optional)
 
-> **Implementation focus:** `structural-index-rust` + `cli-structural` verified on the codesift workspace (2026-06-07). Next: `incremental-watch`, then `mcp-core-tools`.
+> **Implementation focus:** `structural-index-rust` + `cli-structural` verified on the codesift workspace (2026-06-07). Dogfooding exercises [DF-001–003](dogfooding/README.md) in CI. Next: `incremental-watch`, then `mcp-core-tools`.
 
 Update this blurb as work shifts; it does **not** block other capabilities.
 

@@ -19,6 +19,10 @@ mise run cli index .
 mise run cli --format json query "symbol:name=main kind=function"
 ```
 
+## Dogfooding
+
+Agent exercises with ground truth and baselines: [docs/dogfooding/](docs/dogfooding/).
+
 ## Quick links
 
 - [Vision](docs/product/vision.md) — problem, solution, principles
@@ -32,7 +36,7 @@ mise run cli --format json query "symbol:name=main kind=function"
 ```bash
 # CLI
 codesift index .
-codesift query "callers:of sym://..."
+codesift query "callers:of=sym://..."
 codesift search "retry with exponential backoff" --lang rust
 
 # MCP (stdio transport)

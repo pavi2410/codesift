@@ -61,7 +61,7 @@ build usearch vectors from chunks (semantic pass)
 | `symbol:name=` | `name:` secondary index |
 | `refs:to=` | forward `refs` or scan by `to_id` |
 | `callers:of=` | `rev:calls:{to_id}` |
-| `path:` | `path:` secondary index |
+| `path=` filter | `path=` secondary index; glob via `all_symbols` seed |
 
 ## See also
 

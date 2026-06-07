@@ -30,7 +30,7 @@ Agents need structured, verifiable answers — not hallucinated file paths.
 
 | Task | Query | Notes |
 |------|-------|-------|
-| Go to definition | `symbol:name=foo path:src/**` | `lsp-adapter` capability |
+| Go to definition | `symbol:name=foo path=src/**` | `lsp-adapter` capability |
 | Find references | `refs:to=sym://...` | Same index as CLI |
 | Call hierarchy | `callers:of=sym://... depth=3` | Structural graph |
 | Symbol search | `symbol:name=*Auth* kind=function` | Fuzzy via tantivy |

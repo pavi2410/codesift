@@ -1,4 +1,4 @@
-use codesift_store::SymbolRecord;
+use codesift_store::{RefKind, SiteLocation, SymbolRecord};
 use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
@@ -16,6 +16,12 @@ pub struct QueryResponse {
 pub struct QueryHit {
     pub symbol: SymbolRecord,
     pub score: f32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub site: Option<SiteLocation>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ref_kind: Option<RefKind>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub depth: Option<u32>,
 }
 
 #[derive(Debug, Clone, Serialize)]

@@ -12,6 +12,7 @@ Documentation index and reading paths.
 | Understand a design decision | [adr/README.md](adr/README.md) |
 | Look up a term or status | [glossary.md](glossary.md) |
 | Explore future ideas | [future/README.md](future/README.md) |
+| Run agent dogfooding exercises | [dogfooding/README.md](dogfooding/README.md) |
 
 ## Reading paths
 

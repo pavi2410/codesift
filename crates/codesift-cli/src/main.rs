@@ -69,6 +69,8 @@ enum Commands {
         format: String,
         #[arg(long)]
         output: Option<camino::Utf8PathBuf>,
+        #[arg(long)]
+        r#type: Option<String>,
     },
 }
 
@@ -126,21 +128,28 @@ fn run() -> Result<()> {
         }
         Commands::Refs { id, name } => {
             let store = open_store(&workspace)?;
-            let target = if let Some(id) = id {
-                id
-            } else if let Some(name) = name {
-                let symbols = QueryExecutor::new(&store).lookup_by_name(&name, None)?;
-                symbols
-                    .first()
-                    .map(|s| s.id.clone())
-                    .ok_or_else(|| Error::message(format!("symbol not found: {name}")))?
+            let executor = QueryExecutor::new(&store);
+            if let Some(name) = name {
+                let hits = executor.refs_by_name(&name)?;
+                let response = codesift_query::QueryResponse {
+                    query: format!("refs --name {name}"),
+                    workspace_rev: store.meta.workspace_rev,
+                    took_ms: 0,
+                    hits,
+                    total: 0,
+                    error: None,
+                };
+                let mut response = response;
+                response.total = response.hits.len();
+                print_query(&response, format)?;
+            } else if let Some(id) = id {
+                let query = format!("refs:to={id}");
+                let parsed = parse_query(&query)?;
+                let response = executor.execute(&parsed)?;
+                print_query(&response, format)?;
             } else {
                 return Err(Error::message("provide symbol id or --name"));
-            };
-            let query = format!("refs:to={target}");
-            let parsed = parse_query(&query)?;
-            let response = QueryExecutor::new(&store).execute(&parsed)?;
-            print_query(&response, format)?;
+            }
         }
         Commands::Status => {
             let store = open_store(&workspace)?;
@@ -155,12 +164,12 @@ fn run() -> Result<()> {
             };
             print_json(&status, format)?;
         }
-        Commands::Export { format, output } => {
+        Commands::Export { format, output, r#type } => {
             if format != "jsonl" {
                 return Err(Error::message("only --format jsonl is supported in MVP"));
             }
             let store = open_store(&workspace)?;
-            export_jsonl(&store, output.as_deref())?;
+            export_jsonl(&store, output.as_deref(), r#type.as_deref())?;
         }
     }
 
@@ -234,14 +243,31 @@ fn print_query(response: &codesift_query::QueryResponse, format: OutputFormat) -
                 println!("no results");
             } else {
                 for hit in &response.hits {
-                    println!(
-                        "{} {} {}:{}-{}",
-                        hit.symbol.kind.as_str(),
-                        hit.symbol.name,
-                        hit.symbol.path,
-                        hit.symbol.location.start_line,
-                        hit.symbol.location.end_line
-                    );
+                    if let Some(site) = &hit.site {
+                        let depth = hit
+                            .depth
+                            .map(|d| format!(" depth={d}"))
+                            .unwrap_or_default();
+                        println!(
+                            "{} {} {}:{}:{}-{}{}",
+                            hit.symbol.kind.as_str(),
+                            hit.symbol.name,
+                            site.path,
+                            site.start_line,
+                            site.start_column,
+                            hit.symbol.location.end_line,
+                            depth
+                        );
+                    } else {
+                        println!(
+                            "{} {} {}:{}-{}",
+                            hit.symbol.kind.as_str(),
+                            hit.symbol.name,
+                            hit.symbol.path,
+                            hit.symbol.location.start_line,
+                            hit.symbol.location.end_line
+                        );
+                    }
                 }
             }
         }
@@ -270,7 +296,11 @@ fn print_symbols(symbols: &[codesift_store::SymbolRecord], format: OutputFormat)
     Ok(())
 }
 
-fn export_jsonl(store: &IndexStore, output: Option<&camino::Utf8Path>) -> Result<()> {
+fn export_jsonl(
+    store: &IndexStore,
+    output: Option<&camino::Utf8Path>,
+    record_type: Option<&str>,
+) -> Result<()> {
     let mut writer: Box<dyn Write> = if let Some(path) = output {
         Box::new(std::fs::File::create(path).map_err(|source| Error::Io {
             path: path.to_string(),
@@ -280,20 +310,38 @@ fn export_jsonl(store: &IndexStore, output: Option<&camino::Utf8Path>) -> Result
         Box::new(io::stdout())
     };
 
-    for symbol in store.all_symbols()? {
-        let line = serde_json::json!({"type":"symbol","data":symbol});
-        writeln!(writer, "{}", line).map_err(|source| Error::Io {
-            path: "stdout".to_string(),
-            source,
-        })?;
+    let export_symbols = record_type.is_none() || record_type == Some("symbol");
+    let export_refs = record_type.is_none() || record_type == Some("ref");
+    let export_edges = record_type.is_none() || record_type == Some("edge");
+
+    if export_symbols {
+        for symbol in store.all_symbols()? {
+            let line = serde_json::json!({"type":"symbol","data":symbol});
+            writeln!(writer, "{}", line).map_err(|source| Error::Io {
+                path: "stdout".to_string(),
+                source,
+            })?;
+        }
     }
 
-    for reference in store.all_refs()? {
-        let line = serde_json::json!({"type":"ref","data":reference});
-        writeln!(writer, "{}", line).map_err(|source| Error::Io {
-            path: "stdout".to_string(),
-            source,
-        })?;
+    if export_refs {
+        for reference in store.all_refs()? {
+            let line = serde_json::json!({"type":"ref","data":reference});
+            writeln!(writer, "{}", line).map_err(|source| Error::Io {
+                path: "stdout".to_string(),
+                source,
+            })?;
+        }
+    }
+
+    if export_edges {
+        for edge in store.all_edges()? {
+            let line = serde_json::json!({"type":"edge","data":edge});
+            writeln!(writer, "{}", line).map_err(|source| Error::Io {
+                path: "stdout".to_string(),
+                source,
+            })?;
+        }
     }
 
     Ok(())

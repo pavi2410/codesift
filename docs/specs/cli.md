@@ -59,7 +59,6 @@ codesift index [PATH] [OPTIONS]
   "status": "complete",
   "files_indexed": 1284,
   "symbols": 18420,
-  "chunks": 15200,
   "duration_ms": 45000,
   "workspace_rev": 42
 }
@@ -111,21 +110,32 @@ codesift symbol --name main --path src/
 
 ### `refs`
 
-Find references to a symbol.
+Find references to a symbol. Returns one hit per ref/call edge with call-site location in JSON and table output.
 
 ```bash
 codesift refs sym://42/...
 codesift refs --name parse_query
 ```
 
+`--name` aggregates refs across all symbols with that name, including unresolved placeholder targets.
+
 ### `export`
 
-Export index to JSONL.
+Export index to JSONL (symbols, refs, edges).
 
 ```bash
-codesift export --format jsonl --output symbols.jsonl
-codesift export --type symbols,edges,chunks
+codesift export --format jsonl --output index.jsonl
+codesift export --type symbol
+codesift export --type ref
+codesift export --type edge
 ```
+
+| `--type` value | Records exported |
+|----------------|------------------|
+| (default) | symbols, refs, edges |
+| `symbol` | symbol records only |
+| `ref` | ref records only |
+| `edge` | edge/call-graph records only |
 
 ### `status`
 
@@ -141,8 +151,7 @@ codesift status
   "index_format_version": 1,
   "files": 1284,
   "symbols": 18420,
-  "chunks": 15200,
-  "semantic_ready": true,
+  "semantic_ready": false,
   "last_indexed": "2026-06-06T14:30:00Z",
   "index_path": ".codesift"
 }

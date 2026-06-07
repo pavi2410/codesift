@@ -369,10 +369,9 @@ fn push_const_like(
 fn collect_calls(caller: &str, node: &SyntaxNode, output: &mut ParseOutput) {
     for descendant in node.descendants() {
         if let Some(call_expr) = ast::CallExpr::cast(descendant.clone())
-            && let Some(ast::Expr::PathExpr(path_expr)) = call_expr.expr()
-            && let Some(path) = path_expr.path()
-            && let Some(segment) = path.segment()
-            && let Some(callee) = segment.name_ref().map(|n| n.text().to_string())
+            && let Some(callee) = call_expr
+                .expr()
+                .and_then(|expr| callee_name_from_expr(&expr))
         {
             let range = range_of(call_expr.syntax());
             output.calls.push(CallDraft {
@@ -387,10 +386,8 @@ fn collect_calls(caller: &str, node: &SyntaxNode, output: &mut ParseOutput) {
 
         if let Some(path_type) = ast::PathType::cast(descendant)
             && let Some(path) = path_type.path()
-            && let Some(segment) = path.segment()
-            && let Some(name_ref) = segment.name_ref()
+            && let Some(to_name) = path_to_string(&path)
         {
-            let to_name = name_ref.text().to_string();
             let range = range_of(path_type.syntax());
             output.refs.push(RefDraft {
                 from_name: caller.to_string(),
@@ -401,6 +398,34 @@ fn collect_calls(caller: &str, node: &SyntaxNode, output: &mut ParseOutput) {
                 start_column: range.start_column,
             });
         }
+    }
+}
+
+fn callee_name_from_expr(expr: &ast::Expr) -> Option<String> {
+    match expr {
+        ast::Expr::PathExpr(path_expr) => path_expr.path().and_then(|p| path_to_string(&p)),
+        ast::Expr::MethodCallExpr(method) => {
+            let method_name = method.name_ref()?.text().to_string();
+            let receiver = method
+                .receiver()
+                .and_then(|r| callee_name_from_expr(&r))
+                .unwrap_or_else(|| "Self".to_string());
+            Some(format!("{receiver}.{method_name}"))
+        }
+        _ => None,
+    }
+}
+
+fn path_to_string(path: &ast::Path) -> Option<String> {
+    let segments: Vec<String> = path
+        .segments()
+        .map(|segment| segment.syntax().text().to_string().trim().to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
+    if segments.is_empty() {
+        None
+    } else {
+        Some(segments.join("::"))
     }
 }
 
@@ -535,5 +560,19 @@ fn hello() {}
         assert!(functions.contains(&"greet"));
         assert!(functions.contains(&"hello"));
         assert!(output.calls.iter().any(|c| c.callee_name == "hello"));
+    }
+
+    #[test]
+    fn extracts_qualified_call_paths() {
+        let source = r#"
+fn build() {
+    Default::default();
+}
+"#;
+        let provider = RustPsiProvider::default();
+        let dir = tempdir().unwrap();
+        let path = camino::Utf8PathBuf::from_path_buf(dir.path().join("lib.rs")).unwrap();
+        let output = provider.parse_file(source, &path);
+        assert!(output.calls.iter().any(|c| c.callee_name == "Default::default"));
     }
 }

@@ -6,6 +6,8 @@ RUST_BACKTRACE = "1"
 
 [tasks.build-cli]
 description = "Build the codesift CLI release binary"
+sources = ["crates/**/*.rs", "Cargo.toml", "Cargo.lock"]
+outputs = ["target/release/codesift.exe", "target/release/codesift"]
 run = "cargo build --release -p codesift-cli -q"
 
 [tasks.cli]

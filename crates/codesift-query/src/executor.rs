@@ -1,8 +1,8 @@
+use std::collections::{HashSet, VecDeque};
 use std::time::Instant;
 
 use codesift_core::Result;
-use codesift_store::{IndexStore, SymbolRecord};
-use globset::Glob;
+use codesift_store::{IndexStore, RefKind, SymbolRecord};
 
 use crate::parser::StructuralQuery;
 use crate::response::{QueryError, QueryHit, QueryResponse};
@@ -28,7 +28,12 @@ impl<'a> QueryExecutor<'a> {
         }
 
         let mut hits = self.filter_symbols(query)?;
-        hits.sort_by(|a, b| a.symbol.name.cmp(&b.symbol.name));
+        hits.sort_by(|a, b| {
+            a.symbol
+                .name
+                .cmp(&b.symbol.name)
+                .then(a.symbol.path.cmp(&b.symbol.path))
+        });
 
         let total = hits.len();
         Ok(QueryResponse {
@@ -49,7 +54,11 @@ impl<'a> QueryExecutor<'a> {
                 self.store.lookup_by_name(name)?
             }
         } else if let Some(path) = &query.path {
-            self.store.lookup_by_path(path)?
+            if path.contains('*') || path.contains('?') {
+                self.store.all_symbols()?
+            } else {
+                self.store.lookup_by_path(path)?
+            }
         } else if let Some(kind) = &query.kind {
             self.store.lookup_by_kind(kind)?
         } else {
@@ -68,6 +77,10 @@ impl<'a> QueryExecutor<'a> {
             symbols.retain(|s| glob_match(path_glob, &s.path));
         }
 
+        if let Some(lang) = &query.lang {
+            symbols.retain(|s| s.language.as_str() == lang);
+        }
+
         Ok(symbols.into_iter().map(symbol_hit).collect())
     }
 
@@ -81,9 +94,21 @@ impl<'a> QueryExecutor<'a> {
         let mut hits = Vec::new();
         for reference in refs {
             if let Some(symbol) = self.store.get_symbol(&reference.from_id)? {
-                hits.push(symbol_hit(symbol));
+                hits.push(QueryHit {
+                    symbol,
+                    score: 1.0,
+                    site: Some(reference.site),
+                    ref_kind: Some(reference.ref_kind),
+                    depth: None,
+                });
             }
         }
+        hits.sort_by(|a, b| {
+            a.symbol
+                .path
+                .cmp(&b.symbol.path)
+                .then(a.site.as_ref().map(|s| s.start_line).cmp(&b.site.as_ref().map(|s| s.start_line)))
+        });
         let total = hits.len();
         Ok(QueryResponse {
             query: query.raw.clone(),
@@ -101,13 +126,42 @@ impl<'a> QueryExecutor<'a> {
         to_id: &str,
         started: Instant,
     ) -> Result<QueryResponse> {
-        let edges = self.store.callers_of(to_id)?;
+        let max_depth = query.depth.unwrap_or(1);
         let mut hits = Vec::new();
-        for edge in edges {
-            if let Some(symbol) = self.store.get_symbol(&edge.from_id)? {
-                hits.push(symbol_hit(symbol));
+        let mut seen = HashSet::new();
+        let mut queue: VecDeque<(String, u32)> = VecDeque::new();
+        queue.push_back((to_id.to_string(), 0));
+
+        while let Some((current_id, depth)) = queue.pop_front() {
+            if depth >= max_depth {
+                continue;
+            }
+            for edge in self.store.callers_of(&current_id)? {
+                let next_depth = depth + 1;
+                if !seen.insert((edge.from_id.clone(), next_depth)) {
+                    continue;
+                }
+                if let Some(symbol) = self.store.get_symbol(&edge.from_id)? {
+                    hits.push(QueryHit {
+                        symbol,
+                        score: 1.0,
+                        site: edge.call_site.clone(),
+                        ref_kind: Some(RefKind::Call),
+                        depth: Some(next_depth),
+                    });
+                }
+                if next_depth < max_depth {
+                    queue.push_back((edge.from_id.clone(), next_depth));
+                }
             }
         }
+
+        hits.sort_by(|a, b| {
+            a.depth
+                .cmp(&b.depth)
+                .then(a.symbol.path.cmp(&b.symbol.path))
+                .then(a.site.as_ref().map(|s| s.start_line).cmp(&b.site.as_ref().map(|s| s.start_line)))
+        });
         let total = hits.len();
         Ok(QueryResponse {
             query: query.raw.clone(),
@@ -134,17 +188,46 @@ impl<'a> QueryExecutor<'a> {
         }
         Ok(symbols)
     }
+
+    pub fn refs_by_name(&self, name: &str) -> Result<Vec<QueryHit>> {
+        let refs = self.store.refs_to_name(name)?;
+        let mut hits = Vec::new();
+        for reference in refs {
+            if let Some(symbol) = self.store.get_symbol(&reference.from_id)? {
+                hits.push(QueryHit {
+                    symbol,
+                    score: 1.0,
+                    site: Some(reference.site),
+                    ref_kind: Some(reference.ref_kind),
+                    depth: None,
+                });
+            }
+        }
+        hits.sort_by(|a, b| {
+            a.symbol
+                .path
+                .cmp(&b.symbol.path)
+                .then(a.site.as_ref().map(|s| s.start_line).cmp(&b.site.as_ref().map(|s| s.start_line)))
+        });
+        Ok(hits)
+    }
 }
 
 fn symbol_hit(symbol: SymbolRecord) -> QueryHit {
-    QueryHit { symbol, score: 1.0 }
+    QueryHit {
+        symbol,
+        score: 1.0,
+        site: None,
+        ref_kind: None,
+        depth: None,
+    }
 }
 
 fn glob_match(pattern: &str, value: &str) -> bool {
     if !pattern.contains('*') && !pattern.contains('?') {
-        return pattern.eq_ignore_ascii_case(value);
+        return pattern.eq_ignore_ascii_case(value) || value.ends_with(pattern);
     }
-    match Glob::new(pattern) {
+    match globset::Glob::new(pattern) {
         Ok(g) => g.compile_matcher().is_match(value),
         Err(_) => value.contains(pattern.trim_matches('*')),
     }
@@ -170,19 +253,19 @@ mod tests {
     use super::*;
     use crate::parse_query;
     use codesift_core::{Language, Location, Span, SymbolKind};
-    use codesift_store::{IndexStore, RECORD_VERSION};
+    use codesift_store::{IndexStore, RECORD_VERSION, RefKind, RefRecord, SiteLocation};
     use tempfile::tempdir;
 
-    fn sample(id: &str, name: &str, kind: SymbolKind) -> SymbolRecord {
+    fn sample(id: &str, name: &str, kind: SymbolKind, path: &str) -> SymbolRecord {
         SymbolRecord {
             id: id.to_string(),
             kind,
             name: name.to_string(),
             qualified_name: None,
-            path: "src/lib.rs".to_string(),
+            path: path.to_string(),
             language: Language::Rust,
             location: Location::new(
-                "src/lib.rs",
+                path,
                 Language::Rust,
                 Span {
                     start_byte: 0,
@@ -213,6 +296,7 @@ mod tests {
                 "sym://1/src/lib.rs#function:hello@0:10",
                 "hello",
                 SymbolKind::Function,
+                "src/lib.rs",
             ))
             .unwrap();
         store
@@ -220,6 +304,7 @@ mod tests {
                 "sym://1/src/lib.rs#type:Hello@0:10",
                 "Hello",
                 SymbolKind::Type,
+                "src/lib.rs",
             ))
             .unwrap();
         store.commit().unwrap();
@@ -228,5 +313,135 @@ mod tests {
         let response = QueryExecutor::new(&store).execute(&query).unwrap();
         assert_eq!(response.total, 1);
         assert_eq!(response.hits[0].symbol.name, "hello");
+    }
+
+    #[test]
+    fn path_glob_filter_matches_nested_paths() {
+        let dir = tempdir().unwrap();
+        let index_dir = camino::Utf8PathBuf::from_path_buf(dir.path().join(".codesift")).unwrap();
+        let mut store = IndexStore::open(&index_dir).unwrap();
+        store
+            .put_symbol(&sample(
+                "sym://1/crates/query/src/parser.rs#function:parse_query@0:10",
+                "parse_query",
+                SymbolKind::Function,
+                "crates/query/src/parser.rs",
+            ))
+            .unwrap();
+        store
+            .put_symbol(&sample(
+                "sym://1/crates/index/src/lib.rs#function:index@0:10",
+                "index",
+                SymbolKind::Function,
+                "crates/index/src/lib.rs",
+            ))
+            .unwrap();
+        store.commit().unwrap();
+
+        let query = parse_query("path=**/parser.rs kind=function").unwrap();
+        let response = QueryExecutor::new(&store).execute(&query).unwrap();
+        assert_eq!(response.total, 1);
+        assert_eq!(response.hits[0].symbol.name, "parse_query");
+    }
+
+    #[test]
+    fn refs_include_unresolved_targets_for_same_name() {
+        let dir = tempdir().unwrap();
+        let index_dir = camino::Utf8PathBuf::from_path_buf(dir.path().join(".codesift")).unwrap();
+        let mut store = IndexStore::open(&index_dir).unwrap();
+        let target = "sym://1/crates/query/src/parser.rs#function:parse_query@0:10";
+        let caller = "sym://1/crates/cli/src/main.rs#function:run@0:10";
+        store
+            .put_symbol(&sample(
+                target,
+                "parse_query",
+                SymbolKind::Function,
+                "crates/query/src/parser.rs",
+            ))
+            .unwrap();
+        store
+            .put_symbol(&sample(
+                caller,
+                "run",
+                SymbolKind::Function,
+                "crates/cli/src/main.rs",
+            ))
+            .unwrap();
+        let unresolved = "sym://1/unresolved#function:parse_query@0:0";
+        store
+            .put_ref(&RefRecord {
+                from_id: caller.to_string(),
+                to_id: unresolved.to_string(),
+                ref_kind: RefKind::Call,
+                site: SiteLocation {
+                    path: "crates/cli/src/main.rs".to_string(),
+                    start_byte: 100,
+                    end_byte: 110,
+                    start_line: 10,
+                    start_column: 4,
+                },
+                workspace_rev: 1,
+                record_version: RECORD_VERSION,
+            })
+            .unwrap();
+        store.commit().unwrap();
+
+        let query = parse_query(&format!("refs:to={target}")).unwrap();
+        let response = QueryExecutor::new(&store).execute(&query).unwrap();
+        assert_eq!(response.total, 1);
+        assert_eq!(response.hits[0].symbol.name, "run");
+        assert_eq!(response.hits[0].site.as_ref().unwrap().start_line, 10);
+    }
+
+    #[test]
+    fn callers_respect_depth() {
+        let dir = tempdir().unwrap();
+        let index_dir = camino::Utf8PathBuf::from_path_buf(dir.path().join(".codesift")).unwrap();
+        let mut store = IndexStore::open(&index_dir).unwrap();
+        let main_id = "sym://1/src/main.rs#function:main@0:10";
+        let run_id = "sym://1/src/main.rs#function:run@0:10";
+        let parse_id = "sym://1/src/parser.rs#function:parse_query@0:10";
+        for (id, name, path) in [
+            (main_id, "main", "src/main.rs"),
+            (run_id, "run", "src/main.rs"),
+            (parse_id, "parse_query", "src/parser.rs"),
+        ] {
+            store
+                .put_symbol(&sample(id, name, SymbolKind::Function, path))
+                .unwrap();
+        }
+        use codesift_store::{EdgeRecord, Relation, RECORD_VERSION as RV};
+        for (from, to) in [(run_id, parse_id), (main_id, run_id)] {
+            let edge_id = store.next_edge_id(1, Relation::Calls);
+            store
+                .put_edge(&EdgeRecord {
+                    id: edge_id,
+                    relation: Relation::Calls,
+                    from_id: from.to_string(),
+                    to_id: to.to_string(),
+                    call_site: Some(SiteLocation {
+                        path: "src/main.rs".to_string(),
+                        start_byte: 0,
+                        end_byte: 1,
+                        start_line: 1,
+                        start_column: 0,
+                    }),
+                    resolved: true,
+                    workspace_rev: 1,
+                    record_version: RV,
+                })
+                .unwrap();
+        }
+        store.commit().unwrap();
+
+        let query = parse_query(&format!("callers:of={parse_id} depth=2")).unwrap();
+        let response = QueryExecutor::new(&store).execute(&query).unwrap();
+        let names: Vec<_> = response
+            .hits
+            .iter()
+            .map(|h| h.symbol.name.as_str())
+            .collect();
+        assert!(names.contains(&"run"));
+        assert!(names.contains(&"main"));
     }
 }

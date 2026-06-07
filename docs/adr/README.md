@@ -81,3 +81,4 @@ Do **not** write ADRs for trivial choices (e.g. "use `thiserror` for errors") un
 | [0006](0006-tantivy-for-text-search.md) | tantivy for BM25 text search | accepted |
 | [0007](0007-fastembed-for-local-embeddings.md) | fastembed for local embeddings | draft |
 | [0008](0008-postcard-serialization.md) | postcard for index serialization | accepted |
+| [0009](0009-query-filter-syntax.md) | Query filter syntax (first-equals) | accepted |

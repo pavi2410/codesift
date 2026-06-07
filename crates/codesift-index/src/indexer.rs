@@ -3,7 +3,7 @@ use codesift_core::{Language, Location, Result, Span, Workspace, discover_files}
 use codesift_parse::{PsiProvider, RustPsiProvider};
 use codesift_store::{
     EdgeRecord, FileStateRecord, IndexStore, RECORD_VERSION, RefKind, RefRecord, Relation,
-    SiteLocation, SymbolRecord, make_symbol_id,
+    SiteLocation, SymbolRecord, make_symbol_id, make_unresolved_id,
 };
 use std::collections::HashMap;
 use std::fs;
@@ -45,6 +45,7 @@ impl Indexer {
 
         if options.force {
             store.meta.workspace_rev += 1;
+            store.clear_graph()?;
         }
 
         let workspace_rev = store.meta.workspace_rev;
@@ -136,16 +137,7 @@ impl Indexer {
                         .and_then(|v| v.first().map(|s| s.id.clone()))
                 });
 
-                let to_id = store
-                    .lookup_by_name(&call.callee_name)
-                    .ok()
-                    .and_then(|v| v.first().map(|s| s.id.clone()))
-                    .unwrap_or_else(|| {
-                        format!(
-                            "sym://{workspace_rev}/unresolved#function:{}@0:0",
-                            call.callee_name
-                        )
-                    });
+                let to_id = resolve_callee(&store, &name_to_id, &call.callee_name, workspace_rev);
 
                 if let Some(from_id) = from_id {
                     let edge_id = store.next_edge_id(workspace_rev, Relation::Calls);
@@ -250,6 +242,51 @@ impl Indexer {
 
 fn last_segment(name: &str) -> &str {
     name.rsplit("::").next().unwrap_or(name)
+}
+
+fn resolve_callee(
+    store: &IndexStore,
+    name_to_id: &HashMap<String, String>,
+    callee_name: &str,
+    workspace_rev: u64,
+) -> String {
+    if let Some(id) = name_to_id.get(callee_name) {
+        return id.clone();
+    }
+
+    let last = last_segment(callee_name);
+    if let Some(id) = name_to_id.get(last) {
+        return id.clone();
+    }
+
+    if callee_name.contains("::")
+        && let Ok(symbols) = store.all_symbols()
+    {
+        for sym in symbols {
+            if sym.qualified_name.as_deref() == Some(callee_name) {
+                return sym.id.clone();
+            }
+            if let Some(q) = &sym.qualified_name
+                && (q.ends_with(&format!("::{callee_name}")) || q.ends_with(&format!("::{last}")))
+            {
+                return sym.id.clone();
+            }
+        }
+    }
+
+    if let Ok(symbols) = store.lookup_by_name(last) {
+        if let Some(s) = symbols
+            .iter()
+            .find(|s| matches!(s.kind, codesift_core::SymbolKind::Function))
+        {
+            return s.id.clone();
+        }
+        if let Some(s) = symbols.first() {
+            return s.id.clone();
+        }
+    }
+
+    make_unresolved_id(workspace_rev, codesift_core::SymbolKind::Function, last)
 }
 
 #[cfg(test)]

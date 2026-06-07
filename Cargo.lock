@@ -301,6 +301,7 @@ dependencies = [
  "chrono",
  "codesift-core",
  "codesift-parse",
+ "codesift-query",
  "codesift-store",
  "serde",
  "tempfile",
